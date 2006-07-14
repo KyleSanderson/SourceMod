@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="7.10"
 	Name="spcomp"
 	ProjectGUID="{B4C844FF-008D-4BD5-B82F-DC06E706C64B}"
 	RootNamespace="spcomp"
