@@ -1,7 +1,7 @@
 /**
  * vim: set ts=4 :
  * =============================================================================
- * SourceMod SDKTools Extension
+ * SourceMod Counter-Strike:Source Extension
  * Copyright (C) 2004-2008 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -36,7 +36,7 @@
 #ifndef _INCLUDE_SDKTOOLS_VERSION_H_
 #define _INCLUDE_SDKTOOLS_VERSION_H_
 
-#define SVN_FULL_VERSION	"1.0.0.1884"
-#define SVN_FILE_VERSION	1,0,0,1884
+#define SVN_FULL_VERSION	"1.1.0-svn"
+#define SVN_FILE_VERSION	1,1,0,2230
 
 #endif //_INCLUDE_SDKTOOLS_VERSION_H_

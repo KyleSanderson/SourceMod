@@ -828,12 +828,12 @@ static cell_t sm_PrintToConsole(IPluginContext *pCtx, const cell_t *params)
 
 static cell_t sm_ServerCommand(IPluginContext *pContext, const cell_t *params)
 {
-	g_SourceMod.SetGlobalTarget(LANG_SERVER);
+	g_SourceMod.SetGlobalTarget(SOURCEMOD_SERVER_LANGUAGE);
 
 	char buffer[1024];
 	size_t len = g_SourceMod.FormatString(buffer, sizeof(buffer)-2, pContext, params, 1);
 
-	if (pContext->GetContext()->n_err != SP_ERROR_NONE)
+	if (pContext->GetLastNativeError() != SP_ERROR_NONE)
 	{
 		return 0;
 	}
@@ -849,12 +849,12 @@ static cell_t sm_ServerCommand(IPluginContext *pContext, const cell_t *params)
 
 static cell_t sm_InsertServerCommand(IPluginContext *pContext, const cell_t *params)
 {
-	g_SourceMod.SetGlobalTarget(LANG_SERVER);
+	g_SourceMod.SetGlobalTarget(SOURCEMOD_SERVER_LANGUAGE);
 
 	char buffer[1024];
 	size_t len = g_SourceMod.FormatString(buffer, sizeof(buffer)-2, pContext, params, 1);
 
-	if (pContext->GetContext()->n_err != SP_ERROR_NONE)
+	if (pContext->GetLastNativeError() != SP_ERROR_NONE)
 	{
 		return 0;
 	}
@@ -894,7 +894,7 @@ static cell_t sm_ClientCommand(IPluginContext *pContext, const cell_t *params)
 	char buffer[256];
 	g_SourceMod.FormatString(buffer, sizeof(buffer), pContext, params, 2);
 
-	if (pContext->GetContext()->n_err != SP_ERROR_NONE)
+	if (pContext->GetLastNativeError() != SP_ERROR_NONE)
 	{
 		return 0;
 	}
@@ -921,7 +921,7 @@ static cell_t FakeClientCommand(IPluginContext *pContext, const cell_t *params)
 	char buffer[256];
 	g_SourceMod.FormatString(buffer, sizeof(buffer), pContext, params, 2);
 
-	if (pContext->GetContext()->n_err != SP_ERROR_NONE)
+	if (pContext->GetLastNativeError() != SP_ERROR_NONE)
 	{
 		return 0;
 	}
@@ -948,7 +948,7 @@ static cell_t FakeClientCommandEx(IPluginContext *pContext, const cell_t *params
 	char buffer[256];
 	g_SourceMod.FormatString(buffer, sizeof(buffer), pContext, params, 2);
 
-	if (pContext->GetContext()->n_err != SP_ERROR_NONE)
+	if (pContext->GetLastNativeError() != SP_ERROR_NONE)
 	{
 		return 0;
 	}
@@ -966,7 +966,7 @@ static cell_t ReplyToCommand(IPluginContext *pContext, const cell_t *params)
 	char buffer[1024];
 	size_t len = g_SourceMod.FormatString(buffer, sizeof(buffer)-2, pContext, params, 2);
 
-	if (pContext->GetContext()->n_err != SP_ERROR_NONE)
+	if (pContext->GetLastNativeError() != SP_ERROR_NONE)
 	{
 		return 0;
 	}

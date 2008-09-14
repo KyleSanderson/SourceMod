@@ -1,7 +1,7 @@
 /**
  * vim: set ts=4 :
  * =============================================================================
- * SourceMod Sample Extension
+ * SourceMod TopMenus Extension
  * Copyright (C) 2004-2008 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -45,9 +45,9 @@
 #define SMEXT_CONF_VERSION		SVN_FULL_VERSION
 #define SMEXT_CONF_AUTHOR		"AlliedModders"
 #define SMEXT_CONF_URL			"http://www.sourcemod.net/"
-#define SMEXT_CONF_LOGTAG		"MAINMENU"
+#define SMEXT_CONF_LOGTAG		"TOPMENUS"
 #define SMEXT_CONF_LICENSE		"GPLv3"
-#define SMEXT_CONF_DATESTRING	__DATE__
+#define SMEXT_CONF_DATESTRING	__DATE__ " " __TIME__
 
 /** 
  * @brief Exposes plugin's main interface.

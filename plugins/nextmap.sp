@@ -34,7 +34,8 @@
 #pragma semicolon 1
 
 #include <sourcemod>
- 
+#include "include/nextmap.inc"
+
 public Plugin:myinfo = 
 {
 	name = "Nextmap",
@@ -44,56 +45,38 @@ public Plugin:myinfo =
 	url = "http://www.sourcemod.net/"
 };
 
-new bool:g_IntermissionCalled;
-new UserMsg:g_VGUIMenu;
  
-new Handle:g_Cvar_Chattime;
-new Handle:g_Cvar_Nextmap;
-
 new g_MapPos = -1;
 new Handle:g_MapList = INVALID_HANDLE;
 new g_MapListSerial = -1;
+
+new g_CurrentMapStartTime;
  
 public OnPluginStart()
 {
 	LoadTranslations("common.phrases");
 	LoadTranslations("nextmap.phrases");
 	
-	g_VGUIMenu = GetUserMessageId("VGUIMenu");
-	if (g_VGUIMenu == INVALID_MESSAGE_ID)
-	{
-		LogError("FATAL: Cannot find VGUIMenu user message id. Nextmap not loaded.");
-		SetFailState("VGUIMenu Not Found");
-	}
-	
 	g_MapList = CreateArray(32);
 
-	HookUserMessage(g_VGUIMenu, UserMsg_VGUIMenu);
-	
-	g_Cvar_Nextmap = CreateConVar("sm_nextmap", "", "Sets the Next Map", FCVAR_NOTIFY);
-	g_Cvar_Chattime = FindConVar("mp_chattime");
-	
-	RegConsoleCmd("say", Command_Say);
-	RegConsoleCmd("say_team", Command_Say);
-	
-	if (GetCommandFlags("nextmap") == INVALID_FCVAR_FLAGS)
-	{
-		RegServerCmd("nextmap", Command_Nextmap);
-	}
-
-	RegAdminCmd("sm_setnextmap", Command_SetNextmap, ADMFLAG_CHANGEMAP, "sm_setnextmap <map>");
+	RegAdminCmd("sm_maphistory", Command_MapHistory, ADMFLAG_CHANGEMAP, "Shows the most recent maps played");
 	RegConsoleCmd("listmaps", Command_List);
 
 	// Set to the current map so OnMapStart() will know what to do
 	decl String:currentMap[64];
 	GetCurrentMap(currentMap, 64);
-	SetConVarString(g_Cvar_Nextmap, currentMap);
+	SetNextMap(currentMap);
+}
+
+public OnMapStart()
+{
+	g_CurrentMapStartTime = GetTime();
 }
  
 public OnConfigsExecuted()
 {
 	decl String:lastMap[64], String:currentMap[64];
-	GetConVarString(g_Cvar_Nextmap, lastMap, 64);
+	GetNextMap(lastMap, sizeof(lastMap));
 	GetCurrentMap(currentMap, 64);
 	
 	// Why am I doing this? If we switched to a new map, but it wasn't what we expected (Due to sm_map, sm_votemap, or
@@ -103,65 +86,6 @@ public OnConfigsExecuted()
 	{
 		FindAndSetNextMap();
 	}
-}
- 
-public OnMapEnd()
-{
-	g_IntermissionCalled = false;
-}
-
-public Action:Command_Say(client, args)
-{
-	decl String:text[192];
-	if (GetCmdArgString(text, sizeof(text)) < 1)
-	{
-		return Plugin_Continue;
-	}
-	
-	new startidx;
-	if (text[strlen(text)-1] == '"')
-	{
-		text[strlen(text)-1] = '\0';
-		startidx = 1;
-	}
-	
-	decl String:message[8];
-	BreakString(text[startidx], message, sizeof(message));
-	
-	if (strcmp(message, "nextmap", false) == 0)
-	{
-		decl String:map[32];
-		GetConVarString(g_Cvar_Nextmap, map, sizeof(map));
-		
-		PrintToChat(client, "%t", "Next Map", map);
-	}
-	
-	return Plugin_Continue;	
-}
-
-public Action:Command_SetNextmap(client, args)
-{
-	if (args < 1)
-	{
-		ReplyToCommand(client, "[SM] Usage: sm_setnextmap <map>");
-		return Plugin_Handled;
-	}
-
-	decl String:map[64];
-	GetCmdArg(1, map, sizeof(map));
-
-	if (!IsMapValid(map))
-	{
-		ReplyToCommand(client, "[SM] %t", "Map was not found", map);
-		return Plugin_Handled;
-	}
-
-	ShowActivity(client, "%t", "Cvar changed", "sm_nextmap", map);
-	LogMessage("\"%L\" changed sm_nextmap to \"%s\"", client, map);
-
-	SetConVarString(g_Cvar_Nextmap, map);
-
-	return Plugin_Handled;
 }
 
 public Action:Command_List(client, args) 
@@ -178,77 +102,7 @@ public Action:Command_List(client, args)
  
 	return Plugin_Handled;
 }
- 
-public Action:UserMsg_VGUIMenu(UserMsg:msg_id, Handle:bf, const players[], playersNum, bool:reliable, bool:init)
-{
-	if (g_IntermissionCalled)
-	{
-		return Plugin_Handled;
-	}
-	
-	decl String:type[15];
-
-	/* If we don't get a valid string, bail out. */
-	if (BfReadString(bf, type, sizeof(type)) < 0)
-	{
-		return Plugin_Handled;
-	}
- 
-	if (BfReadByte(bf) == 1 && BfReadByte(bf) == 0 && (strcmp(type, "scores", false) == 0))
-	{
-		g_IntermissionCalled = true;
-		
-		decl String:map[32];
-		new Float:fChatTime = GetConVarFloat(g_Cvar_Chattime);
-		
-		GetConVarString(g_Cvar_Nextmap, map, sizeof(map));
-		
-		if (!IsMapValid(map))
-		{
-			if (g_MapPos == -1)
-			{
-				FindAndSetNextMap();
-			}
-			GetArrayString(g_MapList, g_MapPos, map, sizeof(map));
-		}
-		
-		if (fChatTime < 2.0)
-			SetConVarFloat(g_Cvar_Chattime, 2.0);
-		
-		new Handle:dp;
-		CreateDataTimer(fChatTime - 1.0, Timer_ChangeMap, dp);
-		WritePackString(dp, map);
-	}
-	
-	return Plugin_Handled;
-}
-
-public Action:Command_Nextmap(args)
-{
-	decl String:map[64];
-	
-	GetConVarString(g_Cvar_Nextmap, map, sizeof(map));
-	
-	ReplyToCommand(0, "%t", "Next Map", map);
-	
-	return Plugin_Handled;
-}
- 
-public Action:Timer_ChangeMap(Handle:timer, Handle:dp)
-{
-	new String:map[32];
-	
-	ResetPack(dp);
-	ReadPackString(dp, map, sizeof(map));
- 
-	InsertServerCommand("changelevel \"%s\"", map);
-	ServerExecute();
-	
-	LogMessage("Nextmap changed map to \"%s\"", map);
-	
-	return Plugin_Stop;
-}
- 
+  
 FindAndSetNextMap()
 {
 	if (ReadMapList(g_MapList, 
@@ -291,5 +145,61 @@ FindAndSetNextMap()
 		g_MapPos = 0;	
  
  	GetArrayString(g_MapList, g_MapPos, mapName, sizeof(mapName));
-	SetConVarString(g_Cvar_Nextmap, mapName);
+	SetNextMap(mapName);
+}
+
+public Action:Command_MapHistory(client, args)
+{
+	new mapCount = GetMapHistorySize();
+	
+	decl String:mapName[32];
+	decl String:changeReason[100];
+	decl String:timeString[100];
+	decl String:playedTime[100];
+	new startTime;
+	
+	new lastMapStartTime = g_CurrentMapStartTime;
+	
+	PrintToConsole(client, "Map History:\n");
+	PrintToConsole(client, "Map : Started : Played Time : Reason for ending");
+	
+	GetCurrentMap(mapName, sizeof(mapName));
+	PrintToConsole(client, "%02i. %s (Current Map)", 0, mapName);
+	
+	for (new i=0; i<mapCount; i++)
+	{
+		GetMapHistory(i, mapName, sizeof(mapName), changeReason, sizeof(changeReason), startTime);
+
+		FormatTimeDuration(timeString, sizeof(timeString), GetTime() - startTime);
+		FormatTimeDuration(playedTime, sizeof(playedTime), lastMapStartTime - startTime);
+		
+		PrintToConsole(client, "%02i. %s : %s ago : %s : %s", i+1, mapName, timeString, playedTime, changeReason);
+		
+		lastMapStartTime = startTime;
+	}
+}
+
+FormatTimeDuration(String:buffer[], maxlen, time)
+{
+	new	days = time / 86400;
+	new	hours = (time / 3600) % 24;
+	new	minutes = (time / 60) % 60;
+	new	seconds =  time % 60;
+	
+	if (days > 0)
+	{
+		return Format(buffer, maxlen, "%id %ih %im", days, hours, (seconds >= 30) ? minutes+1 : minutes);
+	}
+	else if (hours > 0)
+	{
+		return Format(buffer, maxlen, "%ih %im", hours, (seconds >= 30) ? minutes+1 : minutes);		
+	}
+	else if (minutes > 0)
+	{
+		return Format(buffer, maxlen, "%im", (seconds >= 30) ? minutes+1 : minutes);		
+	}
+	else
+	{
+		return Format(buffer, maxlen, "%is", seconds);		
+	}
 }

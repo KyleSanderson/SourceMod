@@ -83,6 +83,8 @@ typedef uint32_t	funcid_t;			/**< Function index code */
 #define SP_ERROR_NATIVE					23	/**< Error originates from a native */
 #define SP_ERROR_NOT_RUNNABLE			24	/**< Function or plugin is not runnable */
 #define SP_ERROR_ABORTED				25	/**< Function call was aborted */
+#define SP_ERROR_CODE_TOO_OLD			26	/**< Code is too old for this VM */
+#define SP_ERROR_CODE_TOO_NEW			27	/**< Code is too new for this VM */
 //Hey you! Update the string table if you add to the end of me! */
 
 /**********************************************
@@ -91,56 +93,6 @@ typedef uint32_t	funcid_t;			/**< Function index code */
  ***  to hold the back end database format of the plugin
  ***  binary.
  **********************************************/
-
-/**
- * @brief Information about the core plugin tables.  These may or may not be present!
- */
-typedef struct sp_plugin_infotab_s
-{
-	const char *stringbase;		/**< base of string table */
-	uint32_t	publics_num;	/**< number of publics */
-	sp_file_publics_t *publics;	/**< public table */
-	uint32_t	natives_num;	/**< number of natives */
-	sp_file_natives_t *natives; /**< native table */
-	uint32_t	pubvars_num;	/**< number of pubvars */
-	sp_file_pubvars_t *pubvars;	/**< pubvars table */
-} sp_plugin_infotab_t;
-
-/**
- * @brief Information about the plugin's debug tables.  These are all present if one is present.
- */
-typedef struct sp_plugin_debug_s
-{
-	const char *stringbase;		/**< base of string table */
-	uint32_t	files_num;		/**< number of files */
-	sp_fdbg_file_t *files;		/**< files table */
-	uint32_t	lines_num;		/**< number of lines */
-	sp_fdbg_line_t *lines;		/**< lines table */
-	uint32_t	syms_num;		/**< number of symbols */
-	sp_fdbg_symbol_t *symbols;	/**< symbol table */
-} sp_plugin_debug_t;
-
-#define SP_FA_SELF_EXTERNAL		(1<<0)		/**< Allocation of structure is external */
-#define SP_FA_BASE_EXTERNAL		(1<<1)		/**< Allocation of base is external */
-
-/**
- * @brief The rebased memory format of a plugin.  This differs from the on-disk structure 
- * to ensure that the format is properly read.
- */
-typedef struct sp_plugin_s
-{
-	uint8_t		*base;			/**< Base of memory for this plugin. */
-	uint8_t		*pcode;			/**< P-Code of plugin */
-	uint32_t	pcode_size;		/**< Size of p-code */
-	uint8_t		*data;			/**< Data/memory layout */
-	uint32_t	data_size;		/**< Size of data */
-	uint32_t	memory;			/**< Required memory space */
-	uint16_t	flags;			/**< Code flags */
-	uint32_t	allocflags;		/**< Allocation flags */
-	sp_plugin_infotab_t info;	/**< Base info table */
-	sp_plugin_debug_t   debug;	/**< Debug info table */
-} sp_plugin_t;
-
 
 namespace SourcePawn
 {
@@ -203,6 +155,7 @@ typedef struct sp_native_s
 	const char *		name;	/**< Name of function */
 	uint32_t			status;	/**< Status flags */
 	uint32_t			flags;	/**< Native flags */
+	void *				user;	/**< Host-specific data */
 } sp_native_t;
 
 /** 
@@ -249,52 +202,5 @@ typedef struct sp_debug_symbol_s
 	sp_debug_arraydim_t *dims;	/**< Relocated dimension struct, if any */
 	sp_fdbg_symbol_t	*sym;	/**< Pointer to original symbol */
 } sp_debug_symbol_t;
-
-/**
- * Breaks into a debugger
- * Params:
- *  [0] - plugin context
- *  [1] - frm
- *  [2] - cip
- */
-typedef int (*SPVM_DEBUGBREAK)(struct sp_context_s *, uint32_t, uint32_t);
-
-#define SPFLAG_PLUGIN_DEBUG		(1<<0)		/**< plugin is in debug mode */
-#define SPFLAG_PLUGIN_PAUSED	(1<<1)		/**< plugin is "paused" (blocked from executing) */
-
-/**
- * @brief This is the heart of the VM.  It contains all of the runtime 
- * information about a plugin context. Note that user[0..3] can be used for any user based pointers.  
- * However, vm[0..3] should not be touched, as it is reserved for the VM.
- */
-typedef struct sp_context_s
-{
-	void			*codebase;	/**< Base of generated code and memory */
-	sp_plugin_t		*plugin;	/**< Pointer back to parent information */
-	SourcePawn::IPluginContext *context;	/**< Pointer to IPluginContext */
-	SourcePawn::IVirtualMachine *vmbase;	/**< Pointer to IVirtualMachine */
-	void			*user[4];	/**< User specific pointers */
-	void			*vm[4];		/**< VM specific pointers */
-	uint32_t		flags;		/**< Compilation flags */
-	SPVM_DEBUGBREAK dbreak;		/**< Debug break function */
-	uint8_t			*memory;	/**< Data chunk */
-	ucell_t			mem_size;	/**< Total memory size; */
-	cell_t			data_size;	/**< Data chunk size, always starts at 0 */
-	cell_t			heap_base;	/**< Where the heap starts */
-	cell_t			hp;			/**< Heap pointer */
-	cell_t			sp;			/**< Stack pointer */
-	cell_t			frm;		/**< Frame pointer */
-	uint32_t		pushcount;	/**< Push count */
-	int32_t			n_err;		/**< Error code set by a native */
-	uint32_t		n_idx;		/**< Current native index being executed */
-	sp_public_t		*publics;	/**< Public functions table */
-	sp_pubvar_t		*pubvars;	/**< Public variables table */
-	sp_native_t		*natives;	/**< Natives table */
-	sp_debug_file_t	*files;		/**< Files */
-	sp_debug_line_t	*lines;		/**< Lines */
-	sp_debug_symbol_t *symbols;	/**< Symbols */
-	SourcePawn::IProfiler *profiler;		/**< Pointer to IProfiler */
-	uint32_t		prof_flags;	/**< Profiling flags */
-} sp_context_t;
 
 #endif //_INCLUDE_SOURCEPAWN_VM_TYPES_H

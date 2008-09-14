@@ -35,6 +35,10 @@
 
 #include <sourcemod>
 
+#undef REQUIRE_PLUGIN
+#include <mapchooser>
+#define REQUIRE_PLUGIN
+
 public Plugin:myinfo = 
 {
 	name = "Basic Info Triggers",
@@ -50,6 +54,16 @@ new Handle:g_Cvar_FriendlyFire = INVALID_HANDLE;
 
 new Handle:g_Timer_TimeShow = INVALID_HANDLE;
 
+new Handle:g_Cvar_WinLimit = INVALID_HANDLE;
+new Handle:g_Cvar_FragLimit = INVALID_HANDLE;
+new Handle:g_Cvar_MaxRounds = INVALID_HANDLE;
+
+#define TIMELEFT_ALL_ALWAYS		0		/* Print to all players */
+#define TIMELEFT_ALL_MAYBE		1		/* Print to all players if sm_trigger_show allows */
+#define TIMELEFT_ONE			2		/* Print to a single player */
+
+new bool:mapchooser;
+
 public OnPluginStart()
 {
 	LoadTranslations("common.phrases");
@@ -62,7 +76,33 @@ public OnPluginStart()
 	RegConsoleCmd("say", Command_Say);
 	RegConsoleCmd("say_team", Command_Say);
 	
+	RegConsoleCmd("timeleft", Command_Timeleft);
+	RegConsoleCmd("nextmap", Command_Nextmap);
+	
 	HookConVarChange(g_Cvar_TimeleftInterval, ConVarChange_TimeleftInterval);
+	
+	
+	g_Cvar_WinLimit = FindConVar("mp_winlimit");
+	g_Cvar_FragLimit = FindConVar("mp_fraglimit");
+	g_Cvar_MaxRounds = FindConVar("mp_maxrounds");
+	
+	mapchooser = LibraryExists("mapchooser");
+}
+
+public OnLibraryRemoved(const String:name[])
+{
+	if (StrEqual(name, "mapchooser"))
+	{
+		mapchooser = false;
+	}
+}
+ 
+public OnLibraryAdded(const String:name[])
+{
+	if (StrEqual(name, "mapchooser"))
+	{
+		mapchooser = true;
+	}
 }
 
 public ConVarChange_TimeleftInterval(Handle:convar, const String:oldValue[], const String:newValue[])
@@ -90,19 +130,46 @@ public ConVarChange_TimeleftInterval(Handle:convar, const String:oldValue[], con
 
 public Action:Timer_DisplayTimeleft(Handle:timer)
 {
-	new timeleft;
-	if (GetMapTimeLeft(timeleft))
+	ShowTimeLeft(0, TIMELEFT_ALL_ALWAYS);	
+}
+
+public Action:Command_Timeleft(client, args)
+{
+	ShowTimeLeft(client, TIMELEFT_ONE);
+	
+	return Plugin_Handled;
+}
+
+public Action:Command_Nextmap(client, args)
+{
+	decl String:map[64];
+	
+	GetNextMap(map, sizeof(map));
+	
+	if(GetConVarInt(g_Cvar_TriggerShow))
 	{
-		new mins, secs;
-		
-		if (timeleft > 0)
+		if (mapchooser && EndOfMapVoteEnabled() && !HasEndOfMapVoteFinished())
 		{
-			mins = timeleft / 60;
-			secs = timeleft % 60;		
+			PrintToChatAll("[SM] %t", "Pending Vote");			
 		}
-		
-		PrintToChatAll("[SM] %T %d:%02d", "Timeleft", LANG_SERVER, mins, secs);
+		else
+		{
+			PrintToChatAll("[SM] %t", "Next Map", map);
+		}
 	}
+	else
+	{
+		if (mapchooser && EndOfMapVoteEnabled() && !HasEndOfMapVoteFinished())
+		{
+			ReplyToCommand(client, "[SM] %t", "Pending Vote");			
+		}
+		else
+		{
+			ReplyToCommand(client, "[SM] %t", "Next Map", map);
+		}
+	}
+	
+	return Plugin_Handled;
 }
 
 public Action:Command_Say(client, args)
@@ -125,27 +192,7 @@ public Action:Command_Say(client, args)
 
 	if (strcmp(text[startidx], "timeleft", false) == 0)
 	{
-		new timeleft;
-		if (GetMapTimeLeft(timeleft))
-		{
-			new mins, secs;
-			
-			if (timeleft > 0)
-			{
-				mins = timeleft / 60;
-				secs = timeleft % 60;		
-			}
-			
-			if(GetConVarInt(g_Cvar_TriggerShow))
-			{
-				PrintToChatAll("[SM] %t %d:%02d", "Timeleft", mins, secs);
-			}
-			else
-			{
-				PrintToChat(client,"[SM] %t %d:%02d", "Timeleft", mins, secs);
-			}
-		}
-		
+		ShowTimeLeft(client, TIMELEFT_ALL_MAYBE);
 	}
 	else if (strcmp(text[startidx], "thetime", false) == 0)
 	{
@@ -198,7 +245,168 @@ public Action:Command_Say(client, args)
 		{
 			PrintToChat(client,"[SM] %t", "Current Map", map);
 		}
-	}	
+	}
+	else if (strcmp(text[startidx], "nextmap", false) == 0)
+	{
+		decl String:map[32];
+		GetNextMap(map, sizeof(map));
+			
+		if(GetConVarInt(g_Cvar_TriggerShow))
+		{
+			if (mapchooser && EndOfMapVoteEnabled() && !HasEndOfMapVoteFinished())
+			{
+				PrintToChatAll("[SM] %t", "Pending Vote");			
+			}
+			else
+			{
+				PrintToChatAll("[SM] %t", "Next Map", map);
+			}
+		}
+		else
+		{
+			if (mapchooser && !HasEndOfMapVoteFinished())
+			{
+				PrintToChat(client, "[SM] %t", "Pending Vote");			
+			}
+			else
+			{
+				PrintToChat(client, "[SM] %t", "Next Map", map);
+			}
+		}
+	}
 	
 	return Plugin_Continue;
+}
+
+ShowTimeLeft(client, who)
+{
+	new bool:lastround = false;
+	new bool:written = false;
+	new bool:notimelimit = false;
+	
+	decl String:finalOutput[1024];
+	finalOutput[0] = 0;
+	
+	if (who == TIMELEFT_ALL_ALWAYS
+		|| (who == TIMELEFT_ALL_MAYBE && GetConVarInt(g_Cvar_TriggerShow)))
+	{
+		client = 0;	
+	}
+	
+	new timeleft;
+	if (GetMapTimeLeft(timeleft))
+	{
+		new mins, secs;
+		new timelimit;
+		
+		if (timeleft > 0)
+		{
+			mins = timeleft / 60;
+			secs = timeleft % 60;
+			written = true;
+			FormatEx(finalOutput, sizeof(finalOutput), "%T %d:%02d", "Timeleft", client, mins, secs);
+		}
+		else if (GetMapTimeLimit(timelimit) && timelimit == 0)
+		{
+			notimelimit = true;
+		}
+		else
+		{
+			/* 0 timeleft so this must be the last round */
+			lastround=true;
+		}
+	}
+	
+	if (!lastround)
+	{
+		if (g_Cvar_WinLimit != INVALID_HANDLE)
+		{
+			new winlimit = GetConVarInt(g_Cvar_WinLimit);
+			
+			if (winlimit > 0)
+			{
+				if (written)
+				{
+					new len = strlen(finalOutput);
+					if (len < sizeof(finalOutput))
+					{
+						FormatEx(finalOutput[len], sizeof(finalOutput)-len, "%T", "WinLimitAppend" ,client, winlimit, (winlimit == 1)? "":"s");
+					}
+				}
+				else
+				{
+					FormatEx(finalOutput, sizeof(finalOutput), "%T", "WinLimit", client, winlimit, (winlimit == 1)? "":"s");
+					written = true;
+				}
+			}
+		}
+		
+		if (g_Cvar_FragLimit != INVALID_HANDLE)
+		{
+			new fraglimit = GetConVarInt(g_Cvar_FragLimit);
+			
+			if (fraglimit > 0)
+			{
+				if (written)
+				{
+					new len = strlen(finalOutput);
+					if (len < sizeof(finalOutput))
+					{
+						FormatEx(finalOutput[len], sizeof(finalOutput)-len, "%T", "FragLimitAppend", client, fraglimit, (fraglimit == 1)? "":"s");
+					}	
+				}
+				else
+				{
+					FormatEx(finalOutput, sizeof(finalOutput), "%T", "FragLimit", client, fraglimit, (fraglimit == 1)? "":"s");
+					written = true;
+				}			
+			}
+		}
+		
+		if (g_Cvar_MaxRounds != INVALID_HANDLE)
+		{
+			new maxrounds = GetConVarInt(g_Cvar_MaxRounds);
+			
+			if (maxrounds > 0)
+			{
+				if (written)
+				{
+					new len = strlen(finalOutput);
+					if (len < sizeof(finalOutput))
+					{
+						FormatEx(finalOutput[len], sizeof(finalOutput)-len, "%T", "MaxRoundsAppend", client, maxrounds, (maxrounds == 1)? "":"s");
+					}
+				}
+				else
+				{
+					FormatEx(finalOutput, sizeof(finalOutput), "%T", "MaxRounds", client, maxrounds, (maxrounds == 1)? "":"s");
+					written = true;
+				}			
+			}		
+		}
+	}
+	
+	if (lastround)
+	{
+		FormatEx(finalOutput, sizeof(finalOutput), "%T", "LastRound", client);
+	}
+	else if (notimelimit && !written)
+	{
+		FormatEx(finalOutput, sizeof(finalOutput), "%T", "NoTimelimit", client);
+	}
+
+	if (who == TIMELEFT_ALL_ALWAYS
+		|| (who == TIMELEFT_ALL_MAYBE && GetConVarInt(g_Cvar_TriggerShow)))
+	{
+		PrintToChatAll("[SM] %s", finalOutput);
+	}
+	else if (client != 0)
+	{
+		PrintToChat(client, "[SM] %s", finalOutput);
+	}
+	
+	if (client == 0)
+	{
+		PrintToServer("[SM] %s", finalOutput);
+	}
 }

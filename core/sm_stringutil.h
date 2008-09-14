@@ -33,23 +33,30 @@
 #define _INCLUDE_SOURCEMOD_STRINGUTIL_H_
 
 #include <math.h>
-#include "sp_vm_api.h"
-#include "sp_typeutil.h"
+#include <sp_vm_api.h>
+#include <sp_typeutil.h>
+#include <ITranslator.h>
 
 using namespace SourcePawn;
-
-#define LANG_SERVER		0
+using namespace SourceMod;
 
 #define IS_STR_FILLED(var) (var[0] != '\0')
 
 size_t atcprintf(char *buffer, size_t maxlen, const char *format, IPluginContext *pCtx, const cell_t *params, int *param);
 const char *stristr(const char *str, const char *substr);
 unsigned int strncopy(char *dest, const char *src, size_t count);
-size_t gnprintf(char *buffer, size_t maxlen, const char *format, void **args);
+bool gnprintf(char *buffer,
+			  size_t maxlen,
+			  const char *format,
+			  IPhraseCollection *pPhrases,
+			  void **params,
+			  unsigned int numparams,
+			  unsigned int &curparam,
+			  size_t *pOutLength,
+			  const char **pFailPhrase);
 size_t UTIL_Format(char *buffer, size_t maxlength, const char *fmt, ...);
 size_t UTIL_FormatArgs(char *buffer, size_t maxlength, const char *fmt, va_list ap);
 char *sm_strdup(const char *str);
-size_t CorePlayerTranslate(int client, char *buffer, size_t maxlength, const char *phrase, void **params);
 unsigned int UTIL_ReplaceAll(char *subject, size_t maxlength, const char *search, const char *replace);
 char *UTIL_ReplaceEx(char *subject, size_t maxLen, const char *search, size_t searchLen, const char *replace, size_t replaceLen);
 char *UTIL_TrimWhitespace(char *str, size_t &len);

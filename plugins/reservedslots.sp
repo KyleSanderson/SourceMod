@@ -46,12 +46,23 @@ public Plugin:myinfo =
 
 /* Maximum number of clients that can connect to server */
 new g_MaxClients;
+new g_adminCount = 0;
+new bool:g_isAdmin[MAXPLAYERS+1];
 
 /* Handles to convars used by plugin */
 new Handle:sm_reserved_slots;
 new Handle:sm_hide_slots;
 new Handle:sv_visiblemaxplayers;
 new Handle:sm_reserve_type;
+new Handle:sm_reserve_maxadmins;
+new Handle:sm_reserve_kicktype;
+
+enum KickType
+{
+	Kick_HighestPing,
+	Kick_HighestTime,
+	Kick_Random,	
+};
 
 public OnPluginStart()
 {
@@ -60,7 +71,9 @@ public OnPluginStart()
 	sm_reserved_slots = CreateConVar("sm_reserved_slots", "0", "Number of reserved player slots", 0, true, 0.0);
 	sm_hide_slots = CreateConVar("sm_hide_slots", "0", "If set to 1, reserved slots will hidden (subtracted from the max slot count)", 0, true, 0.0, true, 1.0);
 	sv_visiblemaxplayers = FindConVar("sv_visiblemaxplayers");
-	sm_reserve_type = CreateConVar("sm_reserve_type", "0", "Method of reserving slots", 0, true, 0.0, true, 1.0);
+	sm_reserve_type = CreateConVar("sm_reserve_type", "0", "Method of reserving slots", 0, true, 0.0, true, 2.0);
+	sm_reserve_maxadmins = CreateConVar("sm_reserve_maxadmins", "1", "Maximum amount of admins to let in the server with reserve type 2", 0, true, 0.0);
+	sm_reserve_kicktype = CreateConVar("sm_reserve_kicktype", "0", "How to select a client to kick (if appropriate)", 0, true, 0.0, true, 2.0);
 	
 	HookConVarChange(sm_reserved_slots, SlotsChanged);
 	HookConVarChange(sm_hide_slots, SlotsChanged);
@@ -134,10 +147,10 @@ public OnClientPostAdminCheck(client)
 			/* Kick player because there are no public slots left */
 			CreateTimer(0.1, OnTimedKick, client);
 		}
-		else
-		{		
+		else if (type == 1)
+		{	
 			if (clients > limit)
-			{	
+			{
 				if (flags & ADMFLAG_ROOT || flags & ADMFLAG_RESERVATION)
 				{
 					new target = SelectKickClient();
@@ -155,6 +168,35 @@ public OnClientPostAdminCheck(client)
 				}
 			}
 		}
+		else if (type == 2)
+		{
+			if (flags & ADMFLAG_ROOT || flags & ADMFLAG_RESERVATION)
+			{
+				g_adminCount++;
+				g_isAdmin[client] = true;
+			}
+			
+			if (clients > limit && g_adminCount < GetConVarInt(sm_reserve_maxadmins))
+			{
+				/* Server is full, reserved slots aren't and client doesn't have reserved slots access */
+				
+				if (g_isAdmin[client])
+				{
+					new target = SelectKickClient();
+						
+					if (target)
+					{
+						/* Kick public player to free the reserved slot again */
+						CreateTimer(0.1, OnTimedKick, target);
+					}
+				}
+				else
+				{				
+					/* Kick player because there are no public slots left */
+					CreateTimer(0.1, OnTimedKick, client);
+				}		
+			}
+		}
 	}
 }
 
@@ -163,6 +205,12 @@ public OnClientDisconnect_Post(client)
 	if (GetConVarBool(sm_hide_slots))
 	{		
 		SetVisibleMaxSlots(GetClientCount(false), g_MaxClients - GetConVarInt(sm_reserved_slots));
+	}
+	
+	if (g_isAdmin[client])
+	{
+		g_adminCount--;
+		g_isAdmin[client] = false;	
 	}
 }
 
@@ -191,15 +239,17 @@ SetVisibleMaxSlots(clients, limit)
 
 SelectKickClient()
 {
-	new Float:highestLatency;
-	new highestLatencyId;
+	new KickType:type = KickType:GetConVarInt(sm_reserve_kicktype);
 	
-	new Float:highestSpecLatency;
-	new highestSpecLatencyId;
+	new Float:highestValue;
+	new highestValueId;
+	
+	new Float:highestSpecValue;
+	new highestSpecValueId;
 	
 	new bool:specFound;
 	
-	new Float:latency;
+	new Float:value;
 	
 	for (new i=1; i<=g_MaxClients; i++)
 	{	
@@ -215,37 +265,46 @@ SelectKickClient()
 			continue;
 		}
 		
-		latency = 0.0;
+		value = 0.0;
 			
 		if (IsClientInGame(i))
-		{		
-			latency = GetClientAvgLatency(i, NetFlow_Outgoing);
-			
-			LogMessage("Latency : %f",latency);
-			
+		{
+			if (type == Kick_HighestPing)
+			{
+				value = GetClientAvgLatency(i, NetFlow_Outgoing);
+			}
+			else if (type == Kick_HighestTime)
+			{
+				value = GetClientTime(i);
+			}
+			else
+			{
+				value = GetRandomFloat(0.0, 100.0);
+			}
+
 			if (IsClientObserver(i))
 			{			
 				specFound = true;
 				
-				if (latency > highestSpecLatency)
+				if (value > highestSpecValue)
 				{
-					highestSpecLatency = latency;
-					highestSpecLatencyId = i;
+					highestSpecValue = value;
+					highestSpecValueId = i;
 				}
 			}
 		}
 		
-		if (latency >= highestLatency)
+		if (value >= highestValue)
 		{
-			highestLatency = latency;
-			highestLatencyId = i;
+			highestValue = value;
+			highestValueId = i;
 		}
 	}
 	
 	if (specFound)
 	{
-		return highestSpecLatencyId;
+		return highestSpecValueId;
 	}
 	
-	return highestLatencyId;
+	return highestValueId;
 }

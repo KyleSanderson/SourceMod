@@ -1,7 +1,7 @@
 /**
  * vim: set ts=4 :
  * =============================================================================
- * SourceMod Counter-Strike:Source Extension
+ * SourceMod Team Fortress 2 Extension
  * Copyright (C) 2004-2008 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -47,7 +47,7 @@
 #define SMEXT_CONF_URL			"http://www.sourcemod.net/"
 #define SMEXT_CONF_LOGTAG		"TF2"
 #define SMEXT_CONF_LICENSE		"GPL"
-#define SMEXT_CONF_DATESTRING	__DATE__
+#define SMEXT_CONF_DATESTRING	__DATE__ " " __TIME__
 
 /** 
  * @brief Exposes plugin's main interface.
@@ -61,14 +61,14 @@
 #define SMEXT_CONF_METAMOD
 
 /** Enable interfaces you want to use here by uncommenting lines */
-//#define SMEXT_ENABLE_FORWARDSYS
+#define SMEXT_ENABLE_FORWARDSYS
 //#define SMEXT_ENABLE_HANDLESYS
 #define SMEXT_ENABLE_PLAYERHELPERS
 //#define SMEXT_ENABLE_DBMANAGER
 #define SMEXT_ENABLE_GAMECONF
 //#define SMEXT_ENABLE_MEMUTILS
 #define SMEXT_ENABLE_GAMEHELPERS
-//#define SMEXT_ENABLE_TIMERSYS
+#define SMEXT_ENABLE_TIMERSYS
 //#define SMEXT_ENABLE_THREADER
 //#define SMEXT_ENABLE_LIBSYS
 //#define SMEXT_ENABLE_USERMSGS

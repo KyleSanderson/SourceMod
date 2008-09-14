@@ -36,14 +36,21 @@
 
 DebugReport g_DbgReporter;
 
-/* I'm really lazy.  This should probably be exported to ISourcePawnEngine someday,
- * but we need to make sure the JIT will deal with the version bump.
- */
-extern const char *GetSourcePawnErrorMessage(int error);
-
 void DebugReport::OnSourceModAllInitialized()
 {
 	g_pSourcePawn->SetDebugListener(this);
+}
+
+void DebugReport::OnDebugSpew(const char *msg, ...)
+{
+	va_list ap;
+	char buffer[512];
+
+	va_start(ap, msg);
+	UTIL_FormatArgs(buffer, sizeof(buffer), msg, ap);
+	va_end(ap);
+
+	g_Logger.LogMessage("[SM] %s", buffer);
 }
 
 void DebugReport::GenerateError(IPluginContext *ctx, cell_t func_idx, int err, const char *message, ...)
@@ -56,7 +63,7 @@ void DebugReport::GenerateError(IPluginContext *ctx, cell_t func_idx, int err, c
 	va_end(ap);
 
 	const char *plname = g_PluginSys.FindPluginByContext(ctx->GetContext())->GetFilename();
-	const char *error = GetSourcePawnErrorMessage(err);
+	const char *error = g_pSourcePawn2->GetErrorString(err);
 
 	if (error)
 	{
@@ -73,7 +80,7 @@ void DebugReport::GenerateError(IPluginContext *ctx, cell_t func_idx, int err, c
 		{
 			func_idx >>= 1;
 			sp_public_t *function;
-			if (ctx->GetPublicByIndex(func_idx, &function) == SP_ERROR_NONE)
+			if (ctx->GetRuntime()->GetPublicByIndex(func_idx, &function) == SP_ERROR_NONE)
 			{
 				g_Logger.LogError("[SM] Unable to call function \"%s\" due to above error(s).", function->name);
 			}
@@ -91,7 +98,7 @@ void DebugReport::GenerateCodeError(IPluginContext *pContext, uint32_t code_addr
 	va_end(ap);
 
 	const char *plname = g_PluginSys.FindPluginByContext(pContext->GetContext())->GetFilename();
-	const char *error = GetSourcePawnErrorMessage(err);
+	const char *error = g_pSourcePawn2->GetErrorString(err);
 
 	if (error)
 	{
@@ -103,7 +110,7 @@ void DebugReport::GenerateCodeError(IPluginContext *pContext, uint32_t code_addr
 	g_Logger.LogError("[SM] %s", buffer);
 
 	IPluginDebugInfo *pDebug;
-	if ((pDebug = pContext->GetDebugInfo()) == NULL)
+	if ((pDebug = pContext->GetRuntime()->GetDebugInfo()) == NULL)
 	{
 		g_Logger.LogError("[SM] Debug mode is not enabled for \"%s\"", plname);
 		g_Logger.LogError("[SM] To enable debug mode, edit plugin_settings.cfg, or type: sm plugins debug %d on",
@@ -181,6 +188,9 @@ int DebugReport::_GetPluginIndex(IPluginContext *ctx)
 	}
 
 	iter->Release();
-	return -1;
+
+	/* If we don't know which plugin this is, it's one being loaded.  Fake its index for now. */
+
+	return g_PluginSys.GetPluginCount() + 1;
 }
 

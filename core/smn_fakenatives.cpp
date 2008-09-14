@@ -54,8 +54,7 @@ cell_t FakeNativeRouter(IPluginContext *pContext, const cell_t *params, void *pD
 	}
 
 	/* Check if the native is paused */
-	sp_context_t *pNativeCtx = native->ctx->GetContext();
-	if ((pNativeCtx->flags & SPFLAG_PLUGIN_PAUSED) == SPFLAG_PLUGIN_PAUSED)
+	if (native->ctx->GetRuntime()->IsPaused())
 	{
 		return pContext->ThrowNativeError("Plugin owning this native is currently paused.");
 	}
@@ -90,7 +89,7 @@ cell_t FakeNativeRouter(IPluginContext *pContext, const cell_t *params, void *pD
 	int error;
 	if ((error=native->call->Execute(&result)) != SP_ERROR_NONE)
 	{
-		if (pContext->GetContext()->n_err == SP_ERROR_NONE)
+		if (pContext->GetLastNativeError() == SP_ERROR_NONE)
 		{
 			pContext->ThrowNativeErrorEx(error, "Error encountered while processing a dynamic native");
 		}
@@ -113,6 +112,8 @@ cell_t FakeNativeRouter(IPluginContext *pContext, const cell_t *params, void *pD
 static cell_t CreateNative(IPluginContext *pContext, const cell_t *params)
 {
 	char *name;
+	CPlugin *pPlugin;
+
 	pContext->LocalToString(params[1], &name);
 
 	IPluginFunction *pFunction = pContext->GetFunctionById(params[2]);
@@ -121,7 +122,9 @@ static cell_t CreateNative(IPluginContext *pContext, const cell_t *params)
 		return pContext->ThrowNativeError("Function %x is not a valid function", params[2]);
 	}
 
-	if (!g_PluginSys.AddFakeNative(pFunction, name, FakeNativeRouter))
+	pPlugin = g_PluginSys.GetPluginByCtx(pContext->GetContext());
+
+	if (!pPlugin->AddFakeNative(pFunction, name, FakeNativeRouter))
 	{
 		return pContext->ThrowNativeError("Fatal error creating dynamic native!");
 	}
@@ -136,13 +139,13 @@ static cell_t ThrowNativeError(IPluginContext *pContext, const cell_t *params)
 		return pContext->ThrowNativeError("Not called from inside a native function");
 	}
 
-	g_SourceMod.SetGlobalTarget(LANG_SERVER);
+	g_SourceMod.SetGlobalTarget(SOURCEMOD_SERVER_LANGUAGE);
 
 	char buffer[512];
 
 	g_SourceMod.FormatString(buffer, sizeof(buffer), pContext, params, 2);
 
-	if (pContext->GetContext()->n_err != SP_ERROR_NONE)
+	if (pContext->GetLastNativeError() != SP_ERROR_NONE)
 	{
 		s_curcaller->ThrowNativeError("Error encountered while processing a dynamic native");
 	} else {
@@ -430,7 +433,7 @@ static cell_t FormatNativeString(IPluginContext *pContext, const cell_t *params)
 	pContext->LocalToPhysAddr(params[5], &addr);
 	*addr = (cell_t)written;
 
-	return s_curcaller->GetContext()->n_err;
+	return s_curcaller->GetLastNativeError();
 }
 
 //tee hee

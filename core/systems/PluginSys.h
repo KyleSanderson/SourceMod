@@ -43,7 +43,6 @@
 #include <sh_vector.h>
 #include <sh_string.h>
 #include "sm_globals.h"
-#include "vm/sp_vm_basecontext.h"
 #include "PluginInfoDatabase.h"
 #include "sm_trie.h"
 #include "sourcemod.h"
@@ -53,6 +52,9 @@
 #else
 #include "convar_sm.h"
 #endif
+#include "ITranslator.h"
+#include "NativeOwner.h"
+#include "ShareSys.h"
 
 using namespace SourceHook;
 
@@ -106,27 +108,6 @@ using namespace SourceHook;
  *			 7. Once all plugins are deemed to be loaded, OnPluginStart() is called
  */
 
-#define SM_CONTEXTVAR_MYSELF	0
-
-struct ContextPair
-{
-	ContextPair() : base(NULL), ctx(NULL), co(NULL)
-	{
-	};
-	BaseContext *base;
-	sp_context_t *ctx;
-	ICompilation *co;
-	IVirtualMachine *vm;
-};
-
-struct FakeNative
-{
-	IPluginContext *ctx;
-	IPluginFunction *call;
-	String name;
-	SPVM_NATIVE_FUNC func;
-};
-
 enum LoadRes
 {
 	LoadRes_Successful,
@@ -143,18 +124,10 @@ struct AutoConfig
 };
 
 class CPlugin;
-struct WeakNative
-{
-	WeakNative(CPlugin *plugin, uint32_t index)
-	{
-		pl = plugin;
-		idx = index;
-	}
-	CPlugin *pl;
-	uint32_t idx;
-};
 
-class CPlugin : public IPlugin
+class CPlugin : 
+	public IPlugin,
+	public CNativeOwner
 {
 	friend class CPluginManager;
 	friend class CFunction;
@@ -165,17 +138,19 @@ public:
 	PluginType GetType();
 	SourcePawn::IPluginContext *GetBaseContext();
 	sp_context_t *GetContext();
-	const sm_plugininfo_t *GetPublicInfo();
+	void *GetPluginStructure();
 	const char *GetFilename();
 	bool IsDebugging();
 	PluginStatus GetStatus();
+	const sm_plugininfo_t *GetPublicInfo();
 	bool SetPauseState(bool paused);
 	unsigned int GetSerial();
-	const sp_plugin_t *GetPluginStructure();
 	IdentityToken_t *GetIdentity();
 	unsigned int CalcMemUsage();
 	bool SetProperty(const char *prop, void *ptr);
 	bool GetProperty(const char *prop, void **ptr, bool remove=false);
+	void DropEverything();
+	SourcePawn::IPluginRuntime *GetRuntime();
 public:
 	/**
 	 * Creates a plugin object with default values.
@@ -186,16 +161,6 @@ public:
 	 */
 	static CPlugin *CreatePlugin(const char *file, char *error, size_t maxlength);
 public:
-	/**
-	 * Starts the initial compilation of a plugin.
-	 * Returns false if another compilation exists or there is a current context set.
-	 */
-	ICompilation *StartMyCompile(IVirtualMachine *vm);
-	/** 
-	 * Finalizes a compilation.  If error buffer is NULL, the error is saved locally.
-	 */
-	bool FinishMyCompile(char *error, size_t maxlength);
-	void CancelMyCompile();
 
 	/**
 	 * Sets an error state on the plugin
@@ -234,29 +199,14 @@ public:
 	void Call_OnAllPluginsLoaded();
 
 	/**
-	 * Toggles debug mode in the plugin
-	 */
-	bool ToggleDebugMode(bool debug, char *error, size_t maxlength);
-
-	/**
 	 * Returns true if a plugin is usable.
 	 */
 	bool IsRunnable();
 
 	/**
-	 * Adds a language file index to the plugin's list.
+	 * Get languages info.
 	 */
-	void AddLangFile(unsigned int index);
-
-	/**
-	 * Get language file count for this plugin.
-	 */
-	size_t GetLangFileCount();
-
-	/**
-	 * Get language file index based on the vector index.
-	 */
-	unsigned int GetLangFileByIndex(unsigned int index);
+	IPhraseCollection *GetPhrases();
 public:
 	/**
 	 * Returns the modification time during last plugin load.
@@ -275,6 +225,7 @@ public:
 
 	Handle_t GetMyHandle();
 
+	bool AddFakeNative(IPluginFunction *pFunc, const char *name, SPVM_FAKENATIVE_FUNC func);
 	void AddConfig(bool autoCreate, const char *cfg, const char *folder);
 	unsigned int GetConfigCount();
 	AutoConfig *GetConfig(unsigned int i);
@@ -288,23 +239,17 @@ protected:
 	void SetTimeStamp(time_t t);
 	void DependencyDropped(CPlugin *pOwner);
 private:
-	ContextPair m_ctx;
 	PluginType m_type;
 	char m_filename[PLATFORM_MAX_PATH];
 	PluginStatus m_status;
 	unsigned int m_serial;
 	sm_plugininfo_t m_info;
-	sp_plugin_t *m_plugin;
 	char m_errormsg[256];
 	time_t m_LastAccess;
 	IdentityToken_t *m_ident;
 	Handle_t m_handle;
 	bool m_WasRunning;
-	CVector<unsigned int> m_PhraseFiles;
-	List<CPlugin *> m_dependents;
-	List<CPlugin *> m_dependsOn;
-	List<FakeNative *> m_fakeNatives;
-	List<WeakNative> m_WeakNatives;
+	IPhraseCollection *m_pPhrases;
 	List<String> m_RequiredLibs;
 	List<String> m_Libraries;
 	Trie *m_pProps;
@@ -312,6 +257,10 @@ private:
 	bool m_LibraryMissing;
 	CVector<AutoConfig *> m_configs;
 	bool m_bGotAllLoaded;
+	int m_FileVersion;
+	char m_DateTime[256];
+	IPluginRuntime *m_pRuntime;
+	IPluginContext *m_pContext;
 };
 
 class CPluginManager : 
@@ -391,11 +340,6 @@ public:
 	bool IsLateLoadTime() const;
 
 	/**
-	 * Adds natives from core into the native pool.
-	 */
-	void RegisterNativesFromCore(sp_nativeinfo_t *natives);
-
-	/**
 	 * Converts a Handle to an IPlugin if possible.
 	 */
 	IPlugin *PluginFromHandle(Handle_t handle, HandleError *err);
@@ -410,10 +354,7 @@ public:
 	/** 
 	 * Internal version of FindPluginByContext()
 	 */
-	inline CPlugin *GetPluginByCtx(const sp_context_t *ctx)
-	{
-		return reinterpret_cast<CPlugin *>(ctx->user[SM_CONTEXTVAR_MYSELF]);
-	}
+	CPlugin *GetPluginByCtx(const sp_context_t *ctx);
 
 	/**
 	 * Gets status text for a status code 
@@ -470,11 +411,6 @@ private:
 	bool RunSecondPass(CPlugin *pPlugin, char *error, size_t maxlength);
 
 	/**
-	 * Adds any globally registered natives to a plugin
-	 */
-	void AddCoreNativesToPlugin(CPlugin *pPlugin);
-
-	/**
 	 * Runs an extension pass on a plugin.
 	 */
 	bool LoadOrRequireExtensions(CPlugin *pPlugin, unsigned int pass, char *error, size_t maxlength);
@@ -495,11 +431,7 @@ public:
 	{
 		return m_MyIdent;
 	}
-public:
-	bool AddFakeNative(IPluginFunction *pFunction, const char *name, SPVM_FAKENATIVE_FUNC func);
-	SPVM_NATIVE_FUNC FindCoreNative(const char *name);
 private:
-	void AddFakeNativesToPlugin(CPlugin *pPlugin);
 	void TryRefreshDependencies(CPlugin *pOther);
 private:
 	List<IPluginsListener *> m_listeners;
@@ -509,11 +441,9 @@ private:
 	Trie *m_LoadLookup;
 	bool m_AllPluginsLoaded;
 	IdentityToken_t *m_MyIdent;
-	Trie *m_pCoreNatives;
 
 	/* Dynamic native stuff */
 	List<FakeNative *> m_Natives;
-	Trie *m_pNativeLookup;
 
 	bool m_LoadingLocked;
 };

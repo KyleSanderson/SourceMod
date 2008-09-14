@@ -173,7 +173,7 @@ namespace builder
 
 			lib = new Library();
 			lib.package_path = "addons/sourcemod/bin";
-			lib.source_path = "sourcepawn/jit/x86";
+			lib.source_path = "sourcepawn/jit";
 			lib.binary_name = "sourcepawn.jit.x86";
 			lib.vcproj_name = "jit-x86";
 			libraries.Add(lib);
@@ -260,6 +260,28 @@ namespace builder
 			lib.vcproj_name = "topmenus";
 			libraries.Add(lib);
 
+			lib = new Library();
+			lib.package_path = "addons/sourcemod/extensions/auto.2.ep2";
+			lib.source_path = "extensions/tf2";
+			lib.binary_name = "game.tf2.ext";
+			lib.vcproj_name = "tf2";
+			lib.build_mode = BuildMode.BuildMode_Episode2;
+			libraries.Add(lib);
+
+			lib = new Library();
+			lib.package_path = "addons/sourcemod/extensions";
+			lib.source_path = "extensions/regex";
+			lib.binary_name = "regex.ext";
+			lib.vcproj_name = "regex";
+			libraries.Add(lib);
+
+			lib = new Library();
+			lib.package_path = "addons/sourcemod/extensions";
+			lib.source_path = "extensions/clientprefs";
+			lib.binary_name = "clientprefs.ext";
+			lib.vcproj_name = "clientprefs";
+			libraries.Add(lib);
+
 			return (Library [])libraries.ToArray(typeof(Library));
 		}
 
@@ -296,6 +318,8 @@ namespace builder
 			plugins.Add(new Plugin("rockthevote", true));
 			plugins.Add(new Plugin("adminmenu"));
 			plugins.Add(new Plugin("playercommands"));
+			plugins.Add(new Plugin("clientprefs"));
+			plugins.Add(new Plugin("nominations", true));
 
 			return (Plugin [])plugins.ToArray(typeof(Plugin));
 		}

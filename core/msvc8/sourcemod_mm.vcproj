@@ -16,89 +16,7 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="Release - Episode 1|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			CharacterSet="2"
-			WholeProgramOptimization="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
-				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDK)\public\mathlib&quot;;&quot;$(HL2SDK)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(HL2SDK)\tier1&quot;;&quot;$(SOURCEMM16)&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SOURCEMOD_MM_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;SM_DEFAULT_THREADER"
-				RuntimeLibrary="0"
-				EnableEnhancedInstructionSet="0"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(HL2SDK)\lib\public\tier0.lib&quot; &quot;$(HL2SDK)\lib\public\tier1.lib&quot; &quot;$(HL2SDK)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDK)\lib\public\mathlib.lib&quot;"
-				OutputFile="$(OutDir)\sourcemod.2.ep1.dll"
-				LinkIncremental="1"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug - Episode 1|Win32"
+			Name="CrazyDebug - Old Metamod|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
@@ -123,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDK)\public\mathlib&quot;;&quot;$(HL2SDK)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(HL2SDK)\tier1&quot;;&quot;$(SOURCEMM16)&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;"
+				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDK)\public\mathlib&quot;;&quot;$(HL2SDK)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(SOURCEMM14)&quot;;&quot;$(SOURCEMM14)\sourcemm&quot;;&quot;$(SOURCEMM14)\sourcehook&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SOURCEMOD_MM_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;SM_DEFAULT_THREADER"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -146,253 +64,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(HL2SDK)\lib\public\tier0.lib&quot; &quot;$(HL2SDK)\lib\public\tier1.lib&quot; &quot;$(HL2SDK)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDK)\lib\public\mathlib.lib&quot;"
-				OutputFile="$(OutDir)\sourcemod.2.ep1.dll"
+				AdditionalDependencies="&quot;$(HL2SDK)\lib\public\tier0.lib&quot; &quot;$(HL2SDK)\lib\public\tier1.lib&quot; &quot;$(HL2SDK)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDK)\lib\public\mathlib.lib&quot; dbghelp.lib &quot;Wsock32.lib&quot;"
+				OutputFile="$(OutDir)\sourcemod.1.ep1.dll"
 				LinkIncremental="2"
-				IgnoreDefaultLibraryNames="LIBCMT"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="CrazyDebug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SOURCEMOD_MM_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;SM_DEFAULT_THREADER;CRAZY_DEBUG"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="4"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="tier0.lib tier1.lib vstdlib.lib mathlib.lib dbghelp.lib"
-				LinkIncremental="2"
-				IgnoreDefaultLibraryNames="LIBCMT"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release - Orange Box|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			CharacterSet="2"
-			WholeProgramOptimization="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
-				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDKOB)\public&quot;;&quot;$(HL2SDKOB)\public\engine&quot;;&quot;$(HL2SDKOB)\public\game\server&quot;;&quot;$(HL2SDKOB)\public\mathlib&quot;;&quot;$(HL2SDKOB)\public\tier0&quot;;&quot;$(HL2SDKOB)\public\tier1&quot;;&quot;$(HL2SDKOB)\public\vstdlib&quot;;&quot;$(HL2SDKOB)\tier1&quot;;&quot;$(SOURCEMM16)&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SOURCEMOD_MM_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;SM_DEFAULT_THREADER;ORANGEBOX_BUILD"
-				RuntimeLibrary="0"
-				EnableEnhancedInstructionSet="0"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(HL2SDKOB)\lib\public\tier0.lib&quot; &quot;$(HL2SDKOB)\lib\public\tier1.lib&quot; &quot;$(HL2SDKOB)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDKOB)\lib\public\mathlib.lib&quot;"
-				OutputFile="$(OutDir)\sourcemod.2.ep2.dll"
-				LinkIncremental="1"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug - Orange Box|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP"
-				Optimization="0"
-				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDKOB)\public&quot;;&quot;$(HL2SDKOB)\public\engine&quot;;&quot;$(HL2SDKOB)\public\game\server&quot;;&quot;$(HL2SDKOB)\public\mathlib&quot;;&quot;$(HL2SDKOB)\public\tier0&quot;;&quot;$(HL2SDKOB)\public\tier1&quot;;&quot;$(HL2SDKOB)\public\vstdlib&quot;;&quot;$(HL2SDKOB)\tier1&quot;;&quot;$(SOURCEMM16)&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SOURCEMOD_MM_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;SM_DEFAULT_THREADER;ORANGEBOX_BUILD"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				EnableEnhancedInstructionSet="0"
-				RuntimeTypeInfo="false"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="4"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(HL2SDKOB)\lib\public\tier0.lib&quot; &quot;$(HL2SDKOB)\lib\public\tier1.lib&quot; &quot;$(HL2SDKOB)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDKOB)\lib\public\mathlib.lib&quot;"
-				OutputFile="$(OutDir)\sourcemod.2.ep2.dll"
-				LinkIncremental="2"
-				IgnoreDefaultLibraryNames="LIBCMT"
+				IgnoreDefaultLibraryNames="LIBC;LIBCD;LIBCMT"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -448,7 +123,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDK)\public\mathlib&quot;;&quot;$(HL2SDK)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(HL2SDK)\tier1&quot;;&quot;$(SOURCEMM14)&quot;;&quot;$(SOURCEMM14)\sourcemm&quot;;&quot;$(SOURCEMM14)\sourcehook&quot;"
+				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDK)\public\mathlib&quot;;&quot;$(HL2SDK)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(SOURCEMM14)&quot;;&quot;$(SOURCEMM14)\sourcemm&quot;;&quot;$(SOURCEMM14)\sourcehook&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SOURCEMOD_MM_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;SM_DEFAULT_THREADER"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -471,10 +146,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(HL2SDK)\lib\public\tier0.lib&quot; &quot;$(HL2SDK)\lib\public\tier1.lib&quot; &quot;$(HL2SDK)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDK)\lib\public\mathlib.lib&quot;"
+				AdditionalDependencies="&quot;$(HL2SDK)\lib\public\tier0.lib&quot; &quot;$(HL2SDK)\lib\public\tier1.lib&quot; &quot;$(HL2SDK)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDK)\lib\public\mathlib.lib&quot; &quot;Wsock32.lib&quot;"
 				OutputFile="$(OutDir)\sourcemod.1.ep1.dll"
 				LinkIncremental="2"
-				IgnoreDefaultLibraryNames="LIBCMT"
+				IgnoreDefaultLibraryNames="LIBC;LIBCD;LIBCMT"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -531,7 +206,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDK)\public\mathlib&quot;;&quot;$(HL2SDK)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(HL2SDK)\tier1&quot;;&quot;$(SOURCEMM14)&quot;;&quot;$(SOURCEMM14)\sourcemm&quot;;&quot;$(SOURCEMM14)\sourcehook&quot;"
+				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDK)\public\mathlib&quot;;&quot;$(HL2SDK)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(SOURCEMM14)&quot;;&quot;$(SOURCEMM14)\sourcemm&quot;;&quot;$(SOURCEMM14)\sourcehook&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SOURCEMOD_MM_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;SM_DEFAULT_THREADER"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="0"
@@ -552,9 +227,504 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(HL2SDK)\lib\public\tier0.lib&quot; &quot;$(HL2SDK)\lib\public\tier1.lib&quot; &quot;$(HL2SDK)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDK)\lib\public\mathlib.lib&quot;"
+				AdditionalDependencies="&quot;$(HL2SDK)\lib\public\tier0.lib&quot; &quot;$(HL2SDK)\lib\public\tier1.lib&quot; &quot;$(HL2SDK)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDK)\lib\public\mathlib.lib&quot; &quot;Wsock32.lib&quot;"
 				OutputFile="$(OutDir)\sourcemod.1.ep1.dll"
 				LinkIncremental="1"
+				IgnoreDefaultLibraryNames="LIBC;LIBCD;LIBCMTD"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="CrazyDebug - Orange Box|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDKOB)\public&quot;;&quot;$(HL2SDKOB)\public\engine&quot;;&quot;$(HL2SDKOB)\public\game\server&quot;;&quot;$(HL2SDKOB)\public\mathlib&quot;;&quot;$(HL2SDKOB)\public\tier0&quot;;&quot;$(HL2SDKOB)\public\tier1&quot;;&quot;$(HL2SDKOB)\public\vstdlib&quot;;&quot;$(SOURCEMM16)&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SOURCEMOD_MM_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;SM_DEFAULT_THREADER;ORANGEBOX_BUILD"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				EnableEnhancedInstructionSet="0"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;$(HL2SDKOB)\lib\public\tier0.lib&quot; &quot;$(HL2SDKOB)\lib\public\tier1.lib&quot; &quot;$(HL2SDKOB)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDKOB)\lib\public\mathlib.lib&quot; dbghelp.lib &quot;Wsock32.lib&quot;"
+				OutputFile="$(OutDir)\sourcemod.2.ep2.dll"
+				LinkIncremental="2"
+				IgnoreDefaultLibraryNames="LIBC;LIBCD;LIBCMT"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug - Orange Box|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDKOB)\public&quot;;&quot;$(HL2SDKOB)\public\engine&quot;;&quot;$(HL2SDKOB)\public\game\server&quot;;&quot;$(HL2SDKOB)\public\mathlib&quot;;&quot;$(HL2SDKOB)\public\tier0&quot;;&quot;$(HL2SDKOB)\public\tier1&quot;;&quot;$(HL2SDKOB)\public\vstdlib&quot;;&quot;$(SOURCEMM16)&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SOURCEMOD_MM_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;SM_DEFAULT_THREADER;ORANGEBOX_BUILD"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				EnableEnhancedInstructionSet="0"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;$(HL2SDKOB)\lib\public\tier0.lib&quot; &quot;$(HL2SDKOB)\lib\public\tier1.lib&quot; &quot;$(HL2SDKOB)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDKOB)\lib\public\mathlib.lib&quot; &quot;Wsock32.lib&quot;"
+				OutputFile="$(OutDir)\sourcemod.2.ep2.dll"
+				LinkIncremental="2"
+				IgnoreDefaultLibraryNames="LIBC;LIBCD;LIBCMT"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release - Orange Box|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDKOB)\public&quot;;&quot;$(HL2SDKOB)\public\engine&quot;;&quot;$(HL2SDKOB)\public\game\server&quot;;&quot;$(HL2SDKOB)\public\mathlib&quot;;&quot;$(HL2SDKOB)\public\tier0&quot;;&quot;$(HL2SDKOB)\public\tier1&quot;;&quot;$(HL2SDKOB)\public\vstdlib&quot;;&quot;$(SOURCEMM16)&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SOURCEMOD_MM_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;SM_DEFAULT_THREADER;ORANGEBOX_BUILD"
+				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="0"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;$(HL2SDKOB)\lib\public\tier0.lib&quot; &quot;$(HL2SDKOB)\lib\public\tier1.lib&quot; &quot;$(HL2SDKOB)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDKOB)\lib\public\mathlib.lib&quot; &quot;Wsock32.lib&quot;"
+				OutputFile="$(OutDir)\sourcemod.2.ep2.dll"
+				LinkIncremental="1"
+				IgnoreDefaultLibraryNames="LIBC;LIBCD;LIBCMTD"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="CrazyDebug - Episode 1|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDK)\public\mathlib&quot;;&quot;$(HL2SDK)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(SOURCEMM16)&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SOURCEMOD_MM_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;SM_DEFAULT_THREADER"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				EnableEnhancedInstructionSet="0"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;$(HL2SDK)\lib\public\tier0.lib&quot; &quot;$(HL2SDK)\lib\public\tier1.lib&quot; &quot;$(HL2SDK)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDK)\lib\public\mathlib.lib&quot; dbghelp.lib &quot;Wsock32.lib&quot;"
+				OutputFile="$(OutDir)\sourcemod.2.ep1.dll"
+				LinkIncremental="2"
+				IgnoreDefaultLibraryNames="LIBC;LIBCD;LIBCMT"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug - Episode 1|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDK)\public\mathlib&quot;;&quot;$(HL2SDK)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(SOURCEMM16)&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SOURCEMOD_MM_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;SM_DEFAULT_THREADER"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				EnableEnhancedInstructionSet="0"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;$(HL2SDK)\lib\public\tier0.lib&quot; &quot;$(HL2SDK)\lib\public\tier1.lib&quot; &quot;$(HL2SDK)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDK)\lib\public\mathlib.lib&quot; &quot;Wsock32.lib&quot;"
+				OutputFile="$(OutDir)\sourcemod.2.ep1.dll"
+				LinkIncremental="2"
+				IgnoreDefaultLibraryNames="LIBC;LIBCD;LIBCMT"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release - Episode 1|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="..\;..\systems;..\..\public;..\..\public\sourcepawn;&quot;$(HL2SDK)\public&quot;;&quot;$(HL2SDK)\public\dlls&quot;;&quot;$(HL2SDK)\public\engine&quot;;&quot;$(HL2SDK)\public\mathlib&quot;;&quot;$(HL2SDK)\public\tier0&quot;;&quot;$(HL2SDK)\public\tier1&quot;;&quot;$(HL2SDK)\public\vstdlib&quot;;&quot;$(SOURCEMM16)&quot;;&quot;$(SOURCEMM16)\sourcemm&quot;;&quot;$(SOURCEMM16)\sourcehook&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SOURCEMOD_MM_EXPORTS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;SOURCEMOD_BUILD;SM_DEFAULT_THREADER"
+				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="0"
+				RuntimeTypeInfo="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="&quot;$(HL2SDK)\lib\public\tier0.lib&quot; &quot;$(HL2SDK)\lib\public\tier1.lib&quot; &quot;$(HL2SDK)\lib\public\vstdlib.lib&quot; &quot;$(HL2SDK)\lib\public\mathlib.lib&quot; &quot;Wsock32.lib&quot;"
+				OutputFile="$(OutDir)\sourcemod.2.ep1.dll"
+				LinkIncremental="1"
+				IgnoreDefaultLibraryNames="LIBC;LIBCD;LIBCMTD"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -630,46 +800,58 @@
 			<File
 				RelativePath="..\CrazyDebugger.cpp"
 				>
-			</File>
-			<File
-				RelativePath="..\Database.cpp"
-				>
 				<FileConfiguration
-					Name="Release - Episode 1|Win32"
+					Name="Debug - Old Metamod|Win32"
+					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
-						ExpandAttributedSource="true"
-						AssemblerOutput="4"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="CrazyDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ExpandAttributedSource="false"
-						AssemblerOutput="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release - Orange Box|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ExpandAttributedSource="true"
-						AssemblerOutput="4"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release - Old Metamod|Win32"
+					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
-						ExpandAttributedSource="true"
-						AssemblerOutput="4"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug - Orange Box|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release - Orange Box|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug - Episode 1|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release - Episode 1|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\Database.cpp"
+				>
 			</File>
 			<File
 				RelativePath="..\DebugReporter.cpp"
@@ -688,11 +870,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\GameDataFetcher.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\HalfLife2.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\Logger.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\md5.cpp"
 				>
 			</File>
 			<File
@@ -717,6 +907,18 @@
 			</File>
 			<File
 				RelativePath="..\MenuVoting.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\NativeOwner.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\NextMap.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\PhraseCollection.cpp"
 				>
 			</File>
 			<File
@@ -850,11 +1052,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\GameDataFetcher.h"
+				>
+			</File>
+			<File
 				RelativePath="..\HalfLife2.h"
 				>
 			</File>
 			<File
 				RelativePath="..\Logger.h"
+				>
+			</File>
+			<File
+				RelativePath="..\md5.h"
 				>
 			</File>
 			<File
@@ -879,6 +1089,18 @@
 			</File>
 			<File
 				RelativePath="..\MenuVoting.h"
+				>
+			</File>
+			<File
+				RelativePath="..\NativeOwner.h"
+				>
+			</File>
+			<File
+				RelativePath="..\NextMap.h"
+				>
+			</File>
+			<File
+				RelativePath="..\PhraseCollection.h"
 				>
 			</File>
 			<File
@@ -1051,6 +1273,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\public\ITranslator.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\public\IUserMessages.h"
 				>
 			</File>
@@ -1132,212 +1358,26 @@
 			Name="SourcePawn"
 			UniqueIdentifier="{C3C3DC6E-E392-4916-B893-7ACB92192DE0}"
 			>
-			<Filter
-				Name="Header Files"
-				Filter="h;hpp;hxx;hm;inl;inc;xsd"
-				UniqueIdentifier="{D06F7D18-C940-4200-990B-2D0CF72F91AB}"
+			<File
+				RelativePath="..\..\public\sourcepawn\sp_file_headers.h"
 				>
-				<File
-					RelativePath="..\vm\sp_vm_basecontext.h"
-					>
-				</File>
-				<File
-					RelativePath="..\vm\sp_vm_engine.h"
-					>
-				</File>
-				<File
-					RelativePath="..\vm\sp_vm_function.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Source Files"
-				Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-				UniqueIdentifier="{605A5261-30CD-4cca-BBE2-23BB190DA44E}"
+			</File>
+			<File
+				RelativePath="..\..\public\sourcepawn\sp_typeutil.h"
 				>
-				<File
-					RelativePath="..\vm\sp_vm_basecontext.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\vm\sp_vm_engine.cpp"
-					>
-					<FileConfiguration
-						Name="Release - Episode 1|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug - Episode 1|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="CrazyDebug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories="&quot;$(SOURCEMM16)\sourcehook&quot;"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug - Old Metamod|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories="&quot;$(SOURCEMM16)\sourcehook&quot;"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release - Old Metamod|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories="&quot;$(SOURCEMM16)\sourcehook&quot;"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\vm\sp_vm_function.cpp"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="SDK"
-				UniqueIdentifier="{A76160D7-4623-42c7-9587-62049792B924}"
+			</File>
+			<File
+				RelativePath="..\..\public\sourcepawn\sp_vm_api.h"
 				>
-				<File
-					RelativePath="..\..\public\sourcepawn\sp_file_headers.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\public\sourcepawn\sp_typeutil.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\public\sourcepawn\sp_vm_api.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\public\sourcepawn\sp_vm_base.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\public\sourcepawn\sp_vm_types.h"
-					>
-				</File>
-			</Filter>
-		</Filter>
-		<Filter
-			Name="zlib"
-			UniqueIdentifier="{27E223C9-0208-4c7d-BBAA-DE4BF1745020}"
-			>
-			<Filter
-				Name="Header Files"
-				Filter="h;hpp;hxx;hm;inl;inc;xsd"
-				UniqueIdentifier="{65A17C3B-0B6E-450f-96B8-661D47876D4B}"
+			</File>
+			<File
+				RelativePath="..\..\public\sourcepawn\sp_vm_base.h"
 				>
-				<File
-					RelativePath="..\zlib\crc32.h"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\deflate.h"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\inffast.h"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\inffixed.h"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\inflate.h"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\inftrees.h"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\trees.h"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\zconf.h"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\zlib.h"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\zutil.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Source Files"
-				Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-				UniqueIdentifier="{9279E65A-C154-4296-AE23-949EB8C62BEB}"
+			</File>
+			<File
+				RelativePath="..\..\public\sourcepawn\sp_vm_types.h"
 				>
-				<File
-					RelativePath="..\zlib\adler32.c"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\compress.c"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\crc32.c"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\deflate.c"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\gzio.c"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\infback.c"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\inffast.c"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\inflate.c"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\inftrees.c"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\trees.c"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\uncompr.c"
-					>
-				</File>
-				<File
-					RelativePath="..\zlib\zutil.c"
-					>
-				</File>
-			</Filter>
+			</File>
 		</Filter>
 		<Filter
 			Name="HL2SDK"
@@ -1358,6 +1398,10 @@
 			</File>
 			<File
 				RelativePath="..\smn_adt_array.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\smn_adt_stack.cpp"
 				>
 			</File>
 			<File
@@ -1445,6 +1489,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\smn_nextmap.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\smn_player.cpp"
 				>
 			</File>
@@ -1482,18 +1530,6 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{2A750240-7C10-455f-A900-B9A9D362356C}"
 			>
-			<File
-				RelativePath="..\Makefile.ep1"
-				>
-			</File>
-			<File
-				RelativePath="..\Makefile.ep2"
-				>
-			</File>
-			<File
-				RelativePath="..\Makefile.orig"
-				>
-			</File>
 			<File
 				RelativePath="..\version.rc"
 				>

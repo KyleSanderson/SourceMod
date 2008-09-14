@@ -1,7 +1,7 @@
 /**
  * vim: set ts=4 :
  * =============================================================================
- * SourceMod Counter-Strike:Source Extension
+ * SourceMod Team Fortress 2 Extension
  * Copyright (C) 2004-2008 AlliedModders LLC.  All rights reserved.
  * =============================================================================
  *
@@ -39,6 +39,8 @@
 
 #include "smsdk_ext.h"
 #include <IBinTools.h>
+#include <server_class.h>
+#include <igameevents.h>
 
 /**
  * @brief Sample implementation of the SDK Extension.
@@ -46,7 +48,9 @@
  */
 class TF2Tools : 
 	public SDKExtension,
-	public ICommandTargetProcessor
+	public ICommandTargetProcessor,
+	public IConCommandBaseAccessor,
+	public IGameEventListener2
 {
 public:
 	/**
@@ -88,6 +92,10 @@ public:
 	bool QueryInterfaceDrop(SMInterface *pInterface);
 public:
 	bool ProcessCommandTarget(cmd_target_info_t *info);
+	bool RegisterConCommandBase(ConCommandBase *pVar);
+
+	IGameEventManager2 *m_GameEventManager;
+	void FireGameEvent( IGameEvent *event );
 public:
 #if defined SMEXT_CONF_METAMOD
 	/**
@@ -123,8 +131,32 @@ public:
 #endif
 };
 
+enum TFClassType
+{
+	TFClass_Unknown = 0,
+	TFClass_Scout,
+	TFClass_Sniper,
+	TFClass_Soldier,
+	TFClass_DemoMan,
+	TFClass_Medic,
+	TFClass_Heavy,
+	TFClass_Pyro,
+	TFClass_Spy,
+	TFClass_Engineer
+};
+
+TFClassType ClassnameToType(const char *classname);
+
 extern IBinTools *g_pBinTools;
 extern IGameConfig *g_pGameConf;
-extern SendProp *playerSharedOffset;
+extern sm_sendprop_info_t *playerSharedOffset;
+
+void OnServerActivate(edict_t *pEdictList, int edictCount, int clientMax);
+
+int FindResourceEntity();
+int FindEntityByNetClass(int start, const char *classname);
+
+extern int g_resourceEntity;
+
 
 #endif // _INCLUDE_SOURCEMOD_EXTENSION_PROPER_H_

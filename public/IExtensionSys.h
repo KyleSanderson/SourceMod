@@ -40,6 +40,8 @@
  * @brief Defines the interface for loading/unloading/managing extensions.
  */
 
+struct edict_t;
+
 namespace SourceMod
 {
 	class IExtensionInterface;
@@ -131,7 +133,7 @@ namespace SourceMod
 	 * Note: This is bumped when IShareSys is changed, because IShareSys 
 	 * itself is not versioned.
 	 */
-	#define SMINTERFACE_EXTENSIONAPI_VERSION	3
+	#define SMINTERFACE_EXTENSIONAPI_VERSION	4
 
 	/**
 	 * @brief The interface an extension must expose.
@@ -184,10 +186,16 @@ namespace SourceMod
 		 * interface it's using.  If it's not safe, return false, and the 
 		 * extension will be unloaded afterwards.
 		 *
-		 * NOTE: It is important to also hook NotifyInterfaceDrop() in order to clean up resources.
+		 * NOTE: It is important to also hook NotifyInterfaceDrop() in order to clean 
+		 * up resources.
 		 *
-		 * @param pInterface		Pointer to interface being dropped.
-		 * @return					True to continue, false to unload this extension afterwards.
+		 * @param pInterface		Pointer to interface being dropped.  This 
+		 * 							pointer may be opaque, and it should not 
+		 *							be queried using SMInterface functions unless 
+		 *							it can be verified to match an existing 
+		 *							pointer of known type.
+		 * @return					True to continue, false to unload this 
+		 * 							extension afterwards.
 		 */
 		virtual bool QueryInterfaceDrop(SMInterface *pInterface)
 		{
@@ -197,7 +205,10 @@ namespace SourceMod
 		/**
 		 * @brief Notifies the extension that an external interface it uses is being removed.
 		 *
-		 * @param pInterface		Pointer to interface being dropped.
+		 * @param pInterface		Pointer to interface being dropped.  This
+		 * 							pointer may be opaque, and it should not 
+		 *							be queried using SMInterface functions unless 
+		 *							it can be verified to match an existing 
 		 */
 		virtual void NotifyInterfaceDrop(SMInterface *pInterface)
 		{
@@ -289,6 +300,17 @@ namespace SourceMod
 		 * @return					String containing the compilation date.
 		 */
 		virtual const char *GetExtensionDateString() =0;
+
+		/**
+		 * @brief Called on server activation before plugins receive the OnServerLoad forward.
+		 * 
+		 * @param pEdictList		Edicts list.
+		 * @param edictCount		Number of edicts in the list.
+		 * @param clientMax			Maximum number of clients allowed in the server.
+		 */
+		virtual void OnCoreMapStart(edict_t *pEdictList, int edictCount, int clientMax)
+		{
+		}
 	};
 
 	/**

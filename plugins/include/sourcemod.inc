@@ -72,6 +72,7 @@ struct Plugin
 #include <adt>
 #include <banning>
 #include <commandfilters>
+#include <nextmap>
 
 /**
  * Declare this as a struct in your plugin to expose its information.
@@ -167,6 +168,23 @@ forward OnMapEnd();
  * @noreturn
  */
 forward OnConfigsExecuted();
+
+/**
+ * This is called once, right after OnMapStart() but any time before 
+ * OnConfigsExecuted().  It is called after the "exec sourcemod.cfg" 
+ * command and all AutoExecConfig() exec commands have been added to 
+ * the ServerCommand() buffer.
+ *
+ * If you need to load per-map settings that override default values, 
+ * adding commands to the ServerCommand() buffer here will guarantee 
+ * that they're set before OnConfigsExecuted().
+ *
+ * Unlike OnMapStart() and OnConfigsExecuted(), this is not called on 
+ * late loads that occur after OnMapStart().
+ *
+ * @noreturn
+ */
+forward OnAutoConfigsBuffered();
 
 /**
  * @deprecated Use OnConfigsExecuted() instead.
@@ -312,7 +330,7 @@ native GetTime(bigStamp[2]={0,0});
  * Produces a date and/or time string value for a timestamp.
  *
  * See this URL for valid parameters: 
- * http://opengroup.org/onlinepubs/007908799/xsh/strftime.html
+ * http://cplusplus.com/reference/clibrary/ctime/strftime.html
  *
  * @param buffer		Destination string buffer.
  * @param maxlength		Maximum length of output string buffer.
