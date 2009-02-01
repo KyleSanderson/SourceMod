@@ -63,8 +63,10 @@
 #elif defined __linux__ || defined __APPLE__
 #if defined __linux__
 # define PLATFORM_LINUX
+# define PLATFORM_LIB_EXT		"so"
 #elif defined __APPLE__
 # define PLATFORM_APPLE
+# define PLATFORM_LIB_EXT		"dylib"
 #endif
 #define PLATFORM_POSIX
 #include <errno.h>
@@ -76,7 +78,6 @@
 #include <sys/syslimits.h>
 #endif
 #define PLATFORM_MAX_PATH		PATH_MAX
-#define PLATFORM_LIB_EXT		"so"
 #define PLATFORM_SEP_CHAR		'/'
 #define PLATFORM_SEP_ALTCHAR	'\\'
 #define PLATFORM_EXTERN_C		extern "C" __attribute__((visibility("default")))
