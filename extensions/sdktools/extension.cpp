@@ -30,6 +30,7 @@
  */
 
 #include "extension.h"
+#include <compat_wrappers.h>
 #include "vcallbuilder.h"
 #include "vnatives.h"
 #include "vhelpers.h"
@@ -37,12 +38,7 @@
 #include "tempents.h"
 #include "vsound.h"
 #include "output.h"
-
-#if defined ORANGEBOX_BUILD
-	#define SDKTOOLS_GAME_FILE		"sdktools.games.ep2"
-#else
-	#define SDKTOOLS_GAME_FILE		"sdktools.games"
-#endif
+#include <ISDKTools.h>
 
 /**
  * @file extension.cpp
@@ -65,10 +61,12 @@ IVoiceServer *voiceserver = NULL;
 IPlayerInfoManager *playerinfomngr = NULL;
 ICvar *icvar = NULL;
 IServer *iserver = NULL;
+CGlobalVars *gpGlobals;
 SourceHook::CallClass<IVEngineServer> *enginePatch = NULL;
 SourceHook::CallClass<IEngineSound> *enginesoundPatch = NULL;
 HandleType_t g_CallHandle = 0;
 HandleType_t g_TraceHandle = 0;
+ISDKTools *g_pSDKTools;
 
 SMEXT_LINK(&g_SdkTools);
 
@@ -80,11 +78,13 @@ extern sp_nativeinfo_t g_VoiceNatives[];
 extern sp_nativeinfo_t g_EntInputNatives[];
 extern sp_nativeinfo_t g_TeamNatives[];
 
+static void InitSDKToolsAPI();
+
 bool SDKTools::SDK_OnLoad(char *error, size_t maxlength, bool late)
 {
 	HandleError err;
 
-	if (!gameconfs->LoadGameConfigFile(SDKTOOLS_GAME_FILE, &g_pGameConf, error, maxlength))
+	if (!gameconfs->LoadGameConfigFile("sdktools.games", &g_pGameConf, error, maxlength))
 	{
 		return false;
 	}
@@ -125,7 +125,7 @@ bool SDKTools::SDK_OnLoad(char *error, size_t maxlength, bool late)
 		return false;
 	}
 
-#if defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 	g_pCVar = icvar;
 #endif
 	CONVAR_REGISTER(this);
@@ -143,6 +143,10 @@ bool SDKTools::SDK_OnLoad(char *error, size_t maxlength, bool late)
 	g_OutputManager.Init();
 
 	VoiceInit();
+
+	GetIServer();
+
+	InitSDKToolsAPI();
 
 	return true;
 }
@@ -231,6 +235,7 @@ bool SDKTools::SDK_OnMetamodLoad(ISmmAPI *ismm, char *error, size_t maxlen, bool
 	GET_V_IFACE_ANY(GetServerFactory, playerinfomngr, IPlayerInfoManager, INTERFACEVERSION_PLAYERINFOMANAGER);
 	GET_V_IFACE_CURRENT(GetEngineFactory, icvar, ICvar, CVAR_INTERFACE_VERSION);
 
+	gpGlobals = ismm->GetCGlobals();
 	enginePatch = SH_GET_CALLCLASS(engine);
 	enginesoundPatch = SH_GET_CALLCLASS(engsound);
 
@@ -250,7 +255,6 @@ void SDKTools::SDK_OnAllLoaded()
 	s_TempEntHooks.Initialize();
 	s_SoundHooks.Initialize();
 	InitializeValveGlobals();
-	GetIServer();
 }
 
 bool SDKTools::QueryRunning(char *error, size_t maxlength)
@@ -373,4 +377,29 @@ bool SDKTools::ProcessCommandTarget(cmd_target_info_t *info)
 	snprintf(info->target_name, info->target_name_maxlength, "%s", pTarget->GetName());
 
 	return true;
+}
+
+class SDKTools_API : public ISDKTools
+{
+public:
+	virtual const char *GetInterfaceName()
+	{
+		return SMINTERFACE_SDKTOOLS_NAME;
+	}
+
+	virtual unsigned int GetInterfaceVersion()
+	{
+		return SMINTERFACE_SDKTOOLS_VERSION;
+	}
+
+	virtual IServer *GetIServer()
+	{
+		return iserver;
+	}
+} g_SDKTools_API;
+
+static void InitSDKToolsAPI()
+{
+	g_pSDKTools = &g_SDKTools_API;
+	sharesys->AddInterface(myself, g_pSDKTools);
 }

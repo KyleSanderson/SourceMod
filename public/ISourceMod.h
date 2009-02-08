@@ -43,7 +43,7 @@
 #include <time.h>
 
 #define SMINTERFACE_SOURCEMOD_NAME		"ISourceMod"
-#define SMINTERFACE_SOURCEMOD_VERSION	7
+#define SMINTERFACE_SOURCEMOD_VERSION	9
 
 /**
 * @brief Forward declaration of the KeyValues class.
@@ -69,6 +69,13 @@ namespace SourceMod
 	 * @param simulating		Whether or not the game is ticking.
 	 */
 	typedef void (*GAME_FRAME_HOOK)(bool simulating);
+
+	/**
+	 * @brief Function type for FrameAction callbacks.
+	 *
+	 * @param data				User data pointer.
+	 */
+	typedef void (*FRAMEACTION)(void *data);
 
 	/**
 	 * @brief Contains miscellaneous helper functions.
@@ -248,6 +255,38 @@ namespace SourceMod
 		 * @param hook		Hook function.
 		 */
 		virtual void RemoveGameFrameHook(GAME_FRAME_HOOK hook) =0;
+
+		/**
+		 * @brief Platform-safe wrapper around snprintf().
+		 *
+		 * @param buffer	String buffer.
+		 * @param maxlength	Maximum length of buffer.
+		 * @param fmt		Format specifier string.
+		 * @param ...		Format arguments.
+		 * @return			Number of bytes (not including null terminator) written.
+		 */
+		virtual size_t Format(char *buffer, size_t maxlength, const char *fmt, ...) = 0;
+
+		/**
+		 * @brief Platform-safe wrapper around vsnprintf().
+		 *
+		 * @param buffer	String buffer.
+		 * @param maxlength	Maximum length of buffer.
+		 * @param fmt		Format specifier string.
+		 * @param ap		Format arguments.
+		 * @return			Number of bytes (not including null terminator) written.
+		 */
+		virtual size_t FormatArgs(char *buffer, size_t maxlength, const char *fmt, va_list ap) = 0;
+
+		/**
+		 * @brief Adds an action to be executed on the next available frame.
+		 *
+		 * This function is thread safe.
+		 *
+		 * @param fn		Function to execute.
+		 * @param data		Data to pass to function.
+		 */
+		virtual void AddFrameAction(FRAMEACTION fn, void *data) = 0;
 	};
 }
 

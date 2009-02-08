@@ -48,6 +48,7 @@
 #include "GameConfigs.h"
 #include "DebugReporter.h"
 #include "Profiler.h"
+#include "frame_hooks.h"
 
 SH_DECL_HOOK6(IServerGameDLL, LevelInit, SH_NOATTRIB, false, bool, const char *, const char *, const char *, const char *, bool, bool);
 SH_DECL_HOOK0_void(IServerGameDLL, LevelShutdown, SH_NOATTRIB, false);
@@ -200,7 +201,7 @@ bool SourceModBase::InitializeSourceMod(char *error, size_t maxlength, bool late
 	g_pSourcePawn = getv1();
 	g_pSourcePawn2 = getv2();
 
-	if (g_pSourcePawn2->GetAPIVersion() < 2)
+	if (g_pSourcePawn2->GetAPIVersion() < 3)
 	{
 		g_pSourcePawn2 = NULL;
 		if (error && maxlength)
@@ -379,7 +380,7 @@ void SourceModBase::DoGlobalPluginLoads()
 	g_Extensions.TryAutoload();
 
 	/* Fire the extensions ready message */
-	g_SMAPI->MetaFactory(SOURCEMOD_NOTICE_EXTENSIONS, NULL, NULL);	
+	g_SMAPI->MetaFactory(SOURCEMOD_NOTICE_EXTENSIONS, NULL, NULL);
 
 	/* Load any game extension */
 	const char *game_ext;
@@ -668,6 +669,31 @@ void SourceModBase::ProcessGameFrameHooks(bool simulating)
 	{
 		m_frame_hooks[i](simulating);
 	}
+}
+
+size_t SourceModBase::Format(char *buffer, size_t maxlength, const char *fmt, ...)
+{
+	size_t len;
+	va_list ap;
+
+	va_start(ap, fmt);
+	len = FormatArgs(buffer, maxlength, fmt, ap);
+	va_end(ap);
+
+	return len;
+}
+
+size_t SourceModBase::FormatArgs(char *buffer,
+								 size_t maxlength,
+								 const char *fmt,
+								 va_list ap)
+{
+	return UTIL_FormatArgs(buffer, maxlength, fmt, ap);
+}
+
+void SourceModBase::AddFrameAction(FRAMEACTION fn, void *data)
+{
+	::AddFrameAction(FrameAction(fn, data));
 }
 
 SMGlobalClass *SMGlobalClass::head = NULL;

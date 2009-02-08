@@ -39,6 +39,7 @@
 #include "sm_globals.h"
 #include "sm_memtable.h"
 #include "sm_trie_tpl.h"
+#include "ThreadSupport.h"
 
 using namespace SourceMod;
 using namespace SourceHook;
@@ -55,6 +56,7 @@ public:
 	~CGameConfig();
 public:
 	bool Reparse(char *error, size_t maxlength);
+	bool EnterFile(const char *file, char *error, size_t maxlength);
 public: //ITextListener_SMC
 	SMCResult ReadSMC_NewSection(const SMCStates *states, const char *name);
 	SMCResult ReadSMC_KeyValue(const SMCStates *states, const char *key, const char *value);
@@ -69,7 +71,8 @@ public:
 	unsigned int DecRefCount();
 private:
 	BaseStringTable *m_pStrings;
-	char *m_pFile;
+	char m_File[PLATFORM_MAX_PATH];
+	char m_CurFile[PLATFORM_MAX_PATH];
 	Trie *m_pOffsets;
 	Trie *m_pProps;
 	Trie *m_pKeys;
@@ -83,6 +86,10 @@ private:
 	char m_offset[64];
 	char m_Game[256];
 	bool bShouldBeReadingDefault;
+	bool had_game;
+	bool matched_game;
+	bool had_engine;
+	bool matched_engine;
 
 	/* Custom Sections */
 	unsigned int m_CustomLevel;
@@ -104,6 +111,8 @@ public: //IGameConfigManager
 		HandleError *err);
 	void AddUserConfigHook(const char *sectionname, ITextListener_SMC *listener);
 	void RemoveUserConfigHook(const char *sectionname, ITextListener_SMC *listener);
+	void AcquireLock();
+	void ReleaseLock();
 public: //SMGlobalClass
 	void OnSourceModStartup(bool late);
 	void OnSourceModAllInitialized();
@@ -111,6 +120,7 @@ public: //SMGlobalClass
 private:
 	List<CGameConfig *> m_cfgs;
 	Trie *m_pLookup;
+	IMutex *m_FileLock;
 public:
 	KTrie<ITextListener_SMC *> m_customHandlers;
 };

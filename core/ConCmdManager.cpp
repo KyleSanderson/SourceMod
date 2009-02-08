@@ -40,7 +40,7 @@
 
 ConCmdManager g_ConCmds;
 
-#if defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 	SH_DECL_HOOK1_void(ConCommand, Dispatch, SH_NOATTRIB, false, const CCommand &);
 #else
 	SH_DECL_HOOK0_void(ConCommand, Dispatch, SH_NOATTRIB, false);
@@ -205,7 +205,7 @@ void ConCmdManager::OnPluginDestroyed(IPlugin *plugin)
 		delete pList;
 	}
 }
-#if defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 void CommandCallback(const CCommand &command)
 {
 #else
@@ -229,45 +229,66 @@ void ConCmdManager::SetCommandClient(int client)
 ResultType ConCmdManager::DispatchClientCommand(int client, const char *cmd, int args, ResultType type)
 {
 	ConCmdInfo *pInfo;
-	if (sm_trie_retrieve(m_pCmds, cmd, (void **)&pInfo))
+
+	if (!sm_trie_retrieve(m_pCmds, cmd, (void **)&pInfo))
 	{
-		cell_t result = type;
-		cell_t tempres = result;
-		List<CmdHook *>::iterator iter;
-		CmdHook *pHook;
-		for (iter=pInfo->conhooks.begin();
-			 iter!=pInfo->conhooks.end();
-			 iter++)
+		List<ConCmdInfo *>::iterator iter;
+
+		pInfo = NULL;
+		iter = m_CmdList.begin();
+		while (iter != m_CmdList.end())
 		{
-			pHook = (*iter);
-			if (!pHook->pf->IsRunnable())
+			if (strcasecmp((*iter)->pCmd->GetName(), cmd) == 0)
 			{
-				continue;
+				pInfo = (*iter);
+				break;
 			}
-			if (pHook->pAdmin && !CheckAccess(client, cmd, pHook->pAdmin))
+			iter++;
+		}
+
+		if (pInfo == NULL)
+		{
+			return type;
+		}
+	}
+
+	cell_t result = type;
+	cell_t tempres = result;
+	List<CmdHook *>::iterator iter;
+	CmdHook *pHook;
+	for (iter=pInfo->conhooks.begin();
+		 iter!=pInfo->conhooks.end();
+		 iter++)
+	{
+		pHook = (*iter);
+		if (!pHook->pf->IsRunnable())
+		{
+			continue;
+		}
+		if (pHook->pAdmin && !CheckAccess(client, cmd, pHook->pAdmin))
+		{
+			if (result < Pl_Handled)
 			{
-				if (result < Pl_Handled)
-				{
-					result = Pl_Handled;
-				}
-				continue;
+				result = Pl_Handled;
 			}
-			pHook->pf->PushCell(client);
-			pHook->pf->PushCell(args);
-			if (pHook->pf->Execute(&tempres) == SP_ERROR_NONE)
+			continue;
+		}
+		pHook->pf->PushCell(client);
+		pHook->pf->PushCell(args);
+		if (pHook->pf->Execute(&tempres) == SP_ERROR_NONE)
+		{
+			if (tempres > result)
 			{
-				if (tempres > result)
-				{
-					result = tempres;
-				}
-				if (result == Pl_Stop)
-				{
-					break;
-				}
+				result = tempres;
+			}
+			if (result == Pl_Stop)
+			{
+				break;
 			}
 		}
-		type = (ResultType)result;
 	}
+
+	type = (ResultType)result;
 
 	return type;
 }
@@ -515,7 +536,7 @@ bool ConCmdManager::CheckAccess(int client, const char *cmd, AdminCmdInfo *pAdmi
 		return true;
 	}
 
-	edict_t *pEdict = engine->PEntityOfEntIndex(client);
+	edict_t *pEdict = PEntityOfEntIndex(client);
 	
 	/* If we got here, the command failed... */
 	char buffer[128];
@@ -897,23 +918,7 @@ ConCmdInfo *ConCmdManager::AddOrFindCommand(const char *name, const char *descri
 	{
 		pInfo = new ConCmdInfo();
 		/* Find the commandopan */
-		ConCommandBase *pBase = icvar->GetCommands();
-		ConCommand *pCmd = NULL;
-		while (pBase)
-		{
-			if (strcmp(pBase->GetName(), name) == 0)
-			{
-				/* Don't want to return convar with same name */
-				if (!pBase->IsCommand())
-				{
-					return NULL;
-				}
-
-				pCmd = (ConCommand *)pBase;
-				break;
-			}
-			pBase = const_cast<ConCommandBase *>(pBase->GetNext());
-		}
+		ConCommand *pCmd = FindCommand(name);
 
 		if (!pCmd)
 		{

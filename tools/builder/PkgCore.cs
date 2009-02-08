@@ -44,6 +44,8 @@ namespace builder
 			folders.Add("addons/sourcemod/bin");
 			folders.Add("addons/sourcemod/plugins/disabled");
 			folders.Add("addons/sourcemod/gamedata");
+			folders.Add("addons/sourcemod/gamedata/core.games");
+			folders.Add("addons/sourcemod/gamedata/sdktools.games");
 			folders.Add("addons/sourcemod/configs/geoip");
 			folders.Add("addons/sourcemod/translations");
 			folders.Add("addons/sourcemod/logs");
@@ -57,7 +59,6 @@ namespace builder
 			folders.Add("addons/sourcemod/configs/sql-init-scripts");
 			folders.Add("addons/sourcemod/configs/sql-init-scripts/mysql");
 			folders.Add("addons/sourcemod/configs/sql-init-scripts/sqlite");
-			//folders.Add("addons/sourcemod/extensions/games");
 			folders.Add("addons/sourcemod/scripting/basecommands");
 			folders.Add("addons/sourcemod/scripting/basecomm");
 			folders.Add("addons/sourcemod/scripting/funvotes");
@@ -67,6 +68,7 @@ namespace builder
 			folders.Add("addons/sourcemod/extensions/auto.1.ep1");
 			//folders.Add("addons/sourcemod/extensions/auto.2.ep1");
 			folders.Add("addons/sourcemod/extensions/auto.2.ep2");
+			folders.Add("addons/sourcemod/extensions/auto.2.l4d");
 			folders.Add("addons/sourcemod/scripting/playercommands");
 			folders.Add("addons/metamod");
 			
@@ -110,6 +112,8 @@ namespace builder
 			include_omits[0] = "version.tpl";
 
 			builder.CopyFolder(this, "gamedata", "addons/sourcemod/gamedata", null);
+			builder.CopyFolder(this, "gamedata/sdktools.games", "addons/sourcemod/gamedata/sdktools.games", null);
+			builder.CopyFolder(this, "gamedata/core.games", "addons/sourcemod/gamedata/core.games", null);
 			builder.CopyFolder(this, "plugins", "addons/sourcemod/scripting", plugin_omits);
 			builder.CopyFolder(this, "plugins/include", "addons/sourcemod/scripting/include", include_omits);
 			builder.CopyFolder(this, "translations", "addons/sourcemod/translations", null);
@@ -158,17 +162,17 @@ namespace builder
 			lib = new Library();
 			lib.package_path = "addons/sourcemod/bin";
 			lib.source_path = "core";
-			lib.binary_name = "sourcemod.2.ep1";
+			lib.binary_name = "sourcemod.2.ep2";
 			lib.vcproj_name = "sourcemod_mm";
-			lib.build_mode = BuildMode.BuildMode_Episode1;
+			lib.build_mode = BuildMode.BuildMode_Episode2;
 			libraries.Add(lib);
 
 			lib = new Library();
 			lib.package_path = "addons/sourcemod/bin";
 			lib.source_path = "core";
-			lib.binary_name = "sourcemod.2.ep2";
+			lib.binary_name = "sourcemod.2.l4d";
 			lib.vcproj_name = "sourcemod_mm";
-			lib.build_mode = BuildMode.BuildMode_Episode2;
+			lib.build_mode = BuildMode.BuildMode_Left4Dead;
 			libraries.Add(lib);
 
 			lib = new Library();
@@ -193,10 +197,27 @@ namespace builder
 			libraries.Add(lib);
 
 			lib = new Library();
-			lib.package_path = "addons/sourcemod/extensions";
+			lib.package_path = "addons/sourcemod/extensions/auto.1.ep1";
 			lib.source_path = "extensions/bintools";
 			lib.binary_name = "bintools.ext";
 			lib.vcproj_name = "bintools";
+			lib.build_mode = BuildMode.BuildMode_OldMetamod;
+			libraries.Add(lib);
+
+			lib = new Library();
+			lib.package_path = "addons/sourcemod/extensions/auto.2.ep2";
+			lib.source_path = "extensions/bintools";
+			lib.binary_name = "bintools.ext";
+			lib.vcproj_name = "bintools";
+			lib.build_mode = BuildMode.BuildMode_Episode2;
+			libraries.Add(lib);
+
+			lib = new Library();
+			lib.package_path = "addons/sourcemod/extensions/auto.2.l4d";
+			lib.source_path = "extensions/bintools";
+			lib.binary_name = "bintools.ext";
+			lib.vcproj_name = "bintools";
+			lib.build_mode = BuildMode.BuildMode_Left4Dead;
 			libraries.Add(lib);
 
 			lib = new Library();
@@ -215,19 +236,19 @@ namespace builder
 			libraries.Add(lib);
 
 			lib = new Library();
-			lib.package_path = "addons/sourcemod/extensions/auto.2.ep1";
-			lib.source_path = "extensions/sdktools";
-			lib.binary_name = "sdktools.ext";
-			lib.vcproj_name = "sdktools";
-			lib.build_mode = BuildMode.BuildMode_Episode1;
-			libraries.Add(lib);
-
-			lib = new Library();
 			lib.package_path = "addons/sourcemod/extensions/auto.2.ep2";
 			lib.source_path = "extensions/sdktools";
 			lib.binary_name = "sdktools.ext";
 			lib.vcproj_name = "sdktools";
 			lib.build_mode = BuildMode.BuildMode_Episode2;
+			libraries.Add(lib);
+
+			lib = new Library();
+			lib.package_path = "addons/sourcemod/extensions/auto.2.l4d";
+			lib.source_path = "extensions/sdktools";
+			lib.binary_name = "sdktools.ext";
+			lib.vcproj_name = "sdktools";
+			lib.build_mode = BuildMode.BuildMode_Left4Dead;
 			libraries.Add(lib);
 
 			lib = new Library();
@@ -243,14 +264,6 @@ namespace builder
 			lib.binary_name = "game.cstrike.ext";
 			lib.vcproj_name = "cstrike";
 			lib.build_mode = BuildMode.BuildMode_OldMetamod;
-			libraries.Add(lib);
-
-			lib = new Library();
-			lib.package_path = "addons/sourcemod/extensions/auto.2.ep1";
-			lib.source_path = "extensions/cstrike";
-			lib.binary_name = "game.cstrike.ext";
-			lib.vcproj_name = "cstrike";
-			lib.build_mode = BuildMode.BuildMode_Episode1;
 			libraries.Add(lib);
 
 			lib = new Library();
@@ -280,6 +293,13 @@ namespace builder
 			lib.source_path = "extensions/clientprefs";
 			lib.binary_name = "clientprefs.ext";
 			lib.vcproj_name = "clientprefs";
+			libraries.Add(lib);
+
+			lib = new Library();
+			lib.package_path = "addons/sourcemod/extensions";
+			lib.source_path = "extensions/curl";
+			lib.binary_name = "webternet.ext";
+			lib.vcproj_name = "curl";
 			libraries.Add(lib);
 
 			return (Library [])libraries.ToArray(typeof(Library));
@@ -320,6 +340,7 @@ namespace builder
 			plugins.Add(new Plugin("playercommands"));
 			plugins.Add(new Plugin("clientprefs"));
 			plugins.Add(new Plugin("nominations", true));
+			plugins.Add(new Plugin("sounds"));
 
 			return (Plugin [])plugins.ToArray(typeof(Plugin));
 		}
