@@ -32,10 +32,15 @@
 #ifndef _INCLUDE_SOURCEMOD_FRAME_HOOKS_H_
 #define _INCLUDE_SOURCEMOD_FRAME_HOOKS_H_
 
-typedef void (*FRAMEACTION)(void *data);
+#include <ISourceMod.h>
+
+using namespace SourceMod;
 
 struct FrameAction
 {
+	FrameAction(FRAMEACTION a, void *d) : data(d), action(a)
+	{
+	}
 	void *data;
 	FRAMEACTION action;
 };

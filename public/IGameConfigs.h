@@ -42,7 +42,7 @@
  */
 
 #define SMINTERFACE_GAMECONFIG_NAME			"IGameConfigManager"
-#define SMINTERFACE_GAMECONFIG_VERSION		4
+#define SMINTERFACE_GAMECONFIG_VERSION		5
 
 class SendProp;
 
@@ -161,6 +161,16 @@ namespace SourceMod
 		 * @noreturn
 		 */
 		virtual void RemoveUserConfigHook(const char *sectionname, ITextListener_SMC *listener) =0;
+
+		/**
+		 * @brief Does nothing.
+		 */
+		virtual void AcquireLock() = 0;
+
+		/**
+		 * @brief Does nothing.
+		 */
+		virtual void ReleaseLock() = 0;
 	};
 }
 

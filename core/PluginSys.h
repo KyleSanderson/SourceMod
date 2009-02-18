@@ -47,7 +47,9 @@
 #include "sm_trie.h"
 #include "sourcemod.h"
 #include <IRootConsoleMenu.h>
-#if defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE == SE_LEFT4DEAD
+#include "convar_sm_l4d.h"
+#elif SOURCE_ENGINE == SE_ORANGEBOX
 #include "convar_sm_ob.h"
 #else
 #include "convar_sm.h"
@@ -55,6 +57,8 @@
 #include "ITranslator.h"
 #include "NativeOwner.h"
 #include "ShareSys.h"
+
+class CPlayer;
 
 using namespace SourceHook;
 
@@ -395,6 +399,8 @@ public:
 	CPlugin *FindPluginByConsoleArg(const char *arg);
 
 	void SyncMaxClients(int max_clients);
+
+	void ListPluginsToClient(CPlayer *player, const CCommand &args);
 private:
 	LoadRes _LoadPlugin(CPlugin **pPlugin, const char *path, bool debug, PluginType type, char error[], size_t maxlength);
 

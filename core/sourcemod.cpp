@@ -48,6 +48,7 @@
 #include "GameConfigs.h"
 #include "DebugReporter.h"
 #include "Profiler.h"
+#include "frame_hooks.h"
 
 SH_DECL_HOOK6(IServerGameDLL, LevelInit, SH_NOATTRIB, false, bool, const char *, const char *, const char *, const char *, bool, bool);
 SH_DECL_HOOK0_void(IServerGameDLL, LevelShutdown, SH_NOATTRIB, false);
@@ -68,6 +69,12 @@ bool sm_show_debug_spew = false;
 typedef ISourcePawnEngine *(*GET_SP_V1)();
 typedef ISourcePawnEngine2 *(*GET_SP_V2)();
 typedef void (*NOTIFYSHUTDOWN)();
+
+#ifdef PLATFORM_WINDOWS
+ConVar sm_basepath("sm_basepath", "addons\\sourcemod", 0, "SourceMod base path (set via command line)");
+#elif defined PLATFORM_LINUX || defined PLATFORM_APPLE
+ConVar sm_basepath("sm_basepath", "addons/sourcemod", 0, "SourceMod base path (set via command line)");
+#endif
 
 void ShutdownJIT()
 {
@@ -144,16 +151,26 @@ bool SourceModBase::InitializeSourceMod(char *error, size_t maxlength, bool late
 		}
 	}
 
-	/* Initialize CoreConfig so we can get SourceMod base path properly - this basically parses core.cfg */
-	g_CoreConfig.Initialize();
-
-	/* This shouldn't happen, but can't hurt to be safe */
-	if (!g_LibSys.PathExists(m_SMBaseDir) || !m_GotBasePath)
+	const char *basepath = icvar->GetCommandLineValue("sm_basepath");
+	/* Set a custom base path if there is one. */
+	if (basepath != NULL && basepath[0] != '\0')
 	{
-		g_LibSys.PathFormat(m_SMBaseDir, sizeof(m_SMBaseDir), "%s/addons/sourcemod", g_BaseDir.c_str());
-		g_LibSys.PathFormat(m_SMRelDir, sizeof(m_SMRelDir), "addons/sourcemod");
 		m_GotBasePath = true;
 	}
+	/* Otherwise, use a default and keep the m_GotBasePath unlocked. */
+	else
+	{
+		basepath = sm_basepath.GetDefault();
+	}
+
+	g_LibSys.PathFormat(m_SMBaseDir, sizeof(m_SMBaseDir), "%s/%s", g_BaseDir.c_str(), basepath);
+	g_LibSys.PathFormat(m_SMRelDir, sizeof(m_SMRelDir), "%s", basepath);
+
+	/* Initialize CoreConfig to get the SourceMod base path properly - this parses core.cfg */
+	g_CoreConfig.Initialize();
+
+	/* There will always be a path by this point, since it was force-set above. */
+	m_GotBasePath = true;
 
 	/* Attempt to load the JIT! */
 	char file[PLATFORM_MAX_PATH];
@@ -200,7 +217,7 @@ bool SourceModBase::InitializeSourceMod(char *error, size_t maxlength, bool late
 	g_pSourcePawn = getv1();
 	g_pSourcePawn2 = getv2();
 
-	if (g_pSourcePawn2->GetAPIVersion() < 2)
+	if (g_pSourcePawn2->GetAPIVersion() < 3)
 	{
 		g_pSourcePawn2 = NULL;
 		if (error && maxlength)
@@ -379,7 +396,7 @@ void SourceModBase::DoGlobalPluginLoads()
 	g_Extensions.TryAutoload();
 
 	/* Fire the extensions ready message */
-	g_SMAPI->MetaFactory(SOURCEMOD_NOTICE_EXTENSIONS, NULL, NULL);	
+	g_SMAPI->MetaFactory(SOURCEMOD_NOTICE_EXTENSIONS, NULL, NULL);
 
 	/* Load any game extension */
 	const char *game_ext;
@@ -668,6 +685,36 @@ void SourceModBase::ProcessGameFrameHooks(bool simulating)
 	{
 		m_frame_hooks[i](simulating);
 	}
+}
+
+size_t SourceModBase::Format(char *buffer, size_t maxlength, const char *fmt, ...)
+{
+	size_t len;
+	va_list ap;
+
+	va_start(ap, fmt);
+	len = FormatArgs(buffer, maxlength, fmt, ap);
+	va_end(ap);
+
+	return len;
+}
+
+size_t SourceModBase::FormatArgs(char *buffer,
+								 size_t maxlength,
+								 const char *fmt,
+								 va_list ap)
+{
+	return UTIL_FormatArgs(buffer, maxlength, fmt, ap);
+}
+
+void SourceModBase::AddFrameAction(FRAMEACTION fn, void *data)
+{
+	::AddFrameAction(FrameAction(fn, data));
+}
+
+const char *SourceModBase::GetCoreConfigValue(const char *key)
+{
+	return g_CoreConfig.GetCoreConfigValue(key);
 }
 
 SMGlobalClass *SMGlobalClass::head = NULL;
