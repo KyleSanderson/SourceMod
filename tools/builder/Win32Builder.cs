@@ -38,6 +38,10 @@ namespace builder
 				config_name = "Debug";
 			}
 
+			if (lib.build_mode == BuildMode.BuildMode_DarkMessiah)
+			{
+				config_name = config_name + " - Dark Messiah";
+			}
 			if (lib.build_mode == BuildMode.BuildMode_Episode1)
 			{
 				config_name = config_name + " - Episode 1";
@@ -49,6 +53,10 @@ namespace builder
 			else if (lib.build_mode == BuildMode.BuildMode_OldMetamod)
 			{
 				config_name = config_name + " - Old Metamod";
+			}
+			else if (lib.build_mode == BuildMode.BuildMode_Left4Dead)
+			{
+				config_name = config_name + " - Left 4 Dead";
 			}
 
 			string binpath = Config.PathFormat("{0}/{1}/{2}",

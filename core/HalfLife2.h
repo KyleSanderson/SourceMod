@@ -74,7 +74,7 @@ struct DelayedFakeCliCmd
 struct CachedCommandInfo
 {
 	const CCommand *args;
-#if !defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE <= SE_DARKMESSIAH
 	char cmd[300];
 #endif
 };
@@ -109,6 +109,10 @@ public: //IGameHelpers
 	bool ShowVGUIMenu(int client, const char *name, KeyValues *data, bool show);
 	bool IsLANServer();
 	bool KVLoadFromFile(KeyValues *kv, IBaseFileSystem *filesystem, const char *resourceName, const char *pathID = NULL);
+	edict_t *EdictOfIndex(int index);
+	int IndexOfEdict(edict_t *pEnt);
+	edict_t *GetHandleEntity(CBaseHandle &hndl);
+	void SetHandleEntity(CBaseHandle &hndl, edict_t *pEnt);
 public:
 	void AddToFakeCliCmdQueue(int client, int userid, const char *cmd);
 	void ProcessFakeCliCmdQueue();
@@ -130,6 +134,7 @@ private:
 	THash<datamap_t *, DataMapTrie> m_Maps;
 	int m_MsgTextMsg;
 	int m_HinTextMsg;
+	int m_SayTextMsg;
 	int m_VGUIMenu;
 	Queue<DelayedFakeCliCmd *> m_CmdQueue;
 	CStack<DelayedFakeCliCmd *> m_FreeCmds;
@@ -138,5 +143,7 @@ private:
 };
 
 extern CHalfLife2 g_HL2;
+
+edict_t *GetEntity(cell_t num, CBaseEntity **pData);
 
 #endif //_INCLUDE_SOURCEMOD_CHALFLIFE2_H_

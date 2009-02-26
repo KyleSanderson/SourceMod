@@ -58,7 +58,7 @@ struct MapChangeData
 	time_t startTime;
 };
 
-#if defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 void CmdChangeLevelCallback(const CCommand &command);
 #else
 void CmdChangeLevelCallback();
@@ -69,7 +69,7 @@ class NextMapManager : public SMGlobalClass
 public:
 	NextMapManager();
 
-#if defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 	friend void CmdChangeLevelCallback(const CCommand &command);
 #else
 	friend void CmdChangeLevelCallback();
@@ -84,7 +84,11 @@ public:
 
 	void ForceChangeLevel(const char *mapName, const char* changeReason);
 
+#if SOURCE_ENGINE != SE_DARKMESSIAH
 	void HookChangeLevel(const char *map, const char *unknown);
+#else
+	void HookChangeLevel(const char *map, const char *unknown, const char *video, bool bLongLoading);
+#endif
 
 public:
 	SourceHook::List<MapChangeData *> m_mapHistory;

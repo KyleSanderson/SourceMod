@@ -41,18 +41,20 @@
 
 ConVarManager g_ConVarManager;
 
-#if !defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE <= SE_DARKMESSIAH
 #define CallGlobalChangeCallbacks	CallGlobalChangeCallback
 #endif
 
-#if defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 SH_DECL_HOOK3_void(ICvar, CallGlobalChangeCallbacks, SH_NOATTRIB, false, ConVar *, const char *, float);
 #else
 SH_DECL_HOOK2_void(ICvar, CallGlobalChangeCallbacks, SH_NOATTRIB, false, ConVar *, const char *);
 #endif
 
+#if SOURCE_ENGINE != SE_DARKMESSIAH
 SH_DECL_HOOK5_void(IServerGameDLL, OnQueryCvarValueFinished, SH_NOATTRIB, 0, QueryCvarCookie_t, edict_t *, EQueryCvarValueStatus, const char *, const char *);
 SH_DECL_HOOK5_void(IServerPluginCallbacks, OnQueryCvarValueFinished, SH_NOATTRIB, 0, QueryCvarCookie_t, edict_t *, EQueryCvarValueStatus, const char *, const char *);
+#endif
 
 const ParamType CONVARCHANGE_PARAMS[] = {Param_Cell, Param_String, Param_String};
 typedef List<const ConVar *> ConVarList;
@@ -84,7 +86,7 @@ void ConVarManager::OnSourceModAllInitialized()
 	/**
 	 * Episode 2 has this function by default, but the older versions do not.
 	 */
-#if !defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE == SE_EPISODEONE
 	if (g_SMAPI->GetGameDLLVersion() >= 6)
 	{
 		SH_ADD_HOOK_MEMFUNC(IServerGameDLL, OnQueryCvarValueFinished, gamedll, this, &ConVarManager::OnQueryCvarValueFinished, false);
@@ -141,6 +143,7 @@ void ConVarManager::OnSourceModShutdown()
 	}
 	convar_cache.clear();
 
+#if SOURCE_ENGINE != SE_DARKMESSIAH
 	/* Unhook things */
 	if (m_bIsDLLQueryHooked)
 	{
@@ -152,6 +155,7 @@ void ConVarManager::OnSourceModShutdown()
 		SH_REMOVE_HOOK_MEMFUNC(IServerPluginCallbacks, OnQueryCvarValueFinished, vsp_interface, this, &ConVarManager::OnQueryCvarValueFinished, false);
 		m_bIsVSPQueryHooked = false;
 	}
+#endif
 
 	SH_REMOVE_HOOK_STATICFUNC(ICvar, CallGlobalChangeCallbacks, icvar, OnConVarChanged, false);
 
@@ -189,8 +193,10 @@ void ConVarManager::OnSourceModVSPReceived()
 	}
 #endif
 
+#if SOURCE_ENGINE != SE_DARKMESSIAH
 	SH_ADD_HOOK_MEMFUNC(IServerPluginCallbacks, OnQueryCvarValueFinished, vsp_interface, this, &ConVarManager::OnQueryCvarValueFinished, false);
 	m_bIsVSPQueryHooked = true;
+#endif
 }
 
 bool convar_cache_lookup(const char *name, ConVarInfo **pVar)
@@ -359,17 +365,10 @@ Handle_t ConVarManager::CreateConVar(IPluginContext *pContext, const char *name,
 		}
 	}
 
-	/* To prevent creating a convar that has the same name as a console command... ugh */
-	ConCommandBase *pBase = icvar->GetCommands();
-
-	while (pBase)
+	/* Prevent creating a convar that has the same name as a console command */
+	if (FindCommand(name))
 	{
-		if (pBase->IsCommand() && strcmp(pBase->GetName(), name) == 0)
-		{
-			return BAD_HANDLE;
-		}
-
-		pBase = const_cast<ConCommandBase *>(pBase->GetNext());
+		return BAD_HANDLE;
 	}
 
 	/* Create and initialize ConVarInfo structure */
@@ -535,8 +534,9 @@ void ConVarManager::UnhookConVarChange(ConVar *pConVar, IPluginFunction *pFuncti
 
 QueryCvarCookie_t ConVarManager::QueryClientConVar(edict_t *pPlayer, const char *name, IPluginFunction *pCallback, Handle_t hndl)
 {
-	QueryCvarCookie_t cookie;
+	QueryCvarCookie_t cookie = 0;
 
+#if SOURCE_ENGINE != SE_DARKMESSIAH
 	/* Call StartQueryCvarValue() in either the IVEngineServer or IServerPluginHelpers depending on situation */
 	if (m_bIsDLLQueryHooked)
 	{
@@ -553,6 +553,7 @@ QueryCvarCookie_t ConVarManager::QueryClientConVar(edict_t *pPlayer, const char 
 
 	ConVarQuery query = {cookie, pCallback, hndl};
 	m_ConVarQueries.push_back(query);
+#endif
 
 	return cookie;
 }
@@ -595,7 +596,7 @@ void ConVarManager::AddConVarToPluginList(IPluginContext *pContext, const ConVar
 	}
 }
 
-#if defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 void ConVarManager::OnConVarChanged(ConVar *pConVar, const char *oldValue, float flOldValue)
 #else
 void ConVarManager::OnConVarChanged(ConVar *pConVar, const char *oldValue)
@@ -623,7 +624,7 @@ void ConVarManager::OnConVarChanged(ConVar *pConVar, const char *oldValue)
 			 i != pInfo->changeListeners.end();
 			 i++)
 		{
-#if defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 			(*i)->OnConVarChanged(pConVar, oldValue, flOldValue);
 #else
 			(*i)->OnConVarChanged(pConVar, oldValue, atof(oldValue));
@@ -646,6 +647,7 @@ bool ConVarManager::IsQueryingSupported()
 	return (m_bIsDLLQueryHooked || m_bIsVSPQueryHooked);
 }
 
+#if SOURCE_ENGINE != SE_DARKMESSIAH
 void ConVarManager::OnQueryCvarValueFinished(QueryCvarCookie_t cookie, edict_t *pPlayer, EQueryCvarValueStatus result, const char *cvarName, const char *cvarValue)
 {
 	IPluginFunction *pCallback = NULL;
@@ -668,7 +670,7 @@ void ConVarManager::OnQueryCvarValueFinished(QueryCvarCookie_t cookie, edict_t *
 		cell_t ret;
 
 		pCallback->PushCell(cookie);
-		pCallback->PushCell(engine->IndexOfEdict(pPlayer));
+		pCallback->PushCell(IndexOfEdict(pPlayer));
 		pCallback->PushCell(result);
 		pCallback->PushString(cvarName);
 
@@ -687,6 +689,7 @@ void ConVarManager::OnQueryCvarValueFinished(QueryCvarCookie_t cookie, edict_t *
 		m_ConVarQueries.erase(iter);
 	}
 }
+#endif
 
 HandleError ConVarManager::ReadConVarHandle(Handle_t hndl, ConVar **pVar)
 {

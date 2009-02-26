@@ -175,7 +175,7 @@ static cell_t GiveNamedItem(IPluginContext *pContext, const cell_t *params)
 		return -1;
 	}
 
-	return engine->IndexOfEdict(pEdict);
+	return IndexOfEdict(pEdict);
 }
 
 static cell_t GetPlayerWeaponSlot(IPluginContext *pContext, const cell_t *params)
@@ -211,9 +211,10 @@ static cell_t GetPlayerWeaponSlot(IPluginContext *pContext, const cell_t *params
 		return -1;
 	}
 
-	return engine->IndexOfEdict(pEdict);
+	return IndexOfEdict(pEdict);
 }
 
+#if SOURCE_ENGINE != SE_DARKMESSIAH
 static cell_t IgniteEntity(IPluginContext *pContext, const cell_t *params)
 {
 	static ValveCall *pCall = NULL;
@@ -242,6 +243,42 @@ static cell_t IgniteEntity(IPluginContext *pContext, const cell_t *params)
 
 	return 1;
 }
+#else
+/* Dark Messiah specific version */
+static cell_t IgniteEntity(IPluginContext *pContext, const cell_t *params)
+{
+	static ValveCall *pCall = NULL;
+	if (!pCall)
+	{
+		ValvePassInfo pass[6];
+		InitPass(pass[0], Valve_Float, PassType_Float, PASSFLAG_BYVAL);
+		InitPass(pass[1], Valve_Bool, PassType_Basic, PASSFLAG_BYVAL);
+		InitPass(pass[2], Valve_Float, PassType_Float, PASSFLAG_BYVAL);
+		InitPass(pass[3], Valve_Bool, PassType_Basic, PASSFLAG_BYVAL);
+		InitPass(pass[4], Valve_POD, PassType_Basic, PASSFLAG_BYVAL);
+		InitPass(pass[5], Valve_POD, PassType_Basic, PASSFLAG_BYVAL);
+		if (!CreateBaseCall("Ignite", ValveCall_Entity, NULL, pass, 6, &pCall))
+		{
+			return pContext->ThrowNativeError("\"Ignite\" not supported by this mod");
+		} else if (!pCall) {
+			return pContext->ThrowNativeError("\"Ignite\" wrapper failed to initialized");
+		}
+	}
+
+	START_CALL();
+	DECODE_VALVE_PARAM(1, thisinfo, 0);
+	DECODE_VALVE_PARAM(2, vparams, 0);
+	DECODE_VALVE_PARAM(3, vparams, 1);
+	DECODE_VALVE_PARAM(4, vparams, 2);
+	DECODE_VALVE_PARAM(5, vparams, 3);
+	/* Not sure what these params do, but they appear to be the default values */
+	*(int *)(vptr + 14) = 3;
+	*(int *)(vptr + 18) = 0;
+	FINISH_CALL_SIMPLE(NULL);
+
+	return 1;
+}
+#endif
 
 static cell_t ExtinguishEntity(IPluginContext *pContext, const cell_t *params)
 {
@@ -290,7 +327,7 @@ static cell_t TeleportEntity(IPluginContext *pContext, const cell_t *params)
 	return 1;
 }
 
-#if defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 /* :TODO: This is Team Fortress 2 specific */
 static cell_t ForcePlayerSuicide(IPluginContext *pContext, const cell_t *params)
 {
@@ -352,7 +389,7 @@ static cell_t SetClientViewEntity(IPluginContext *pContext, const cell_t *params
 		return pContext->ThrowNativeError("Client %d is not in game", params[1]);
 	}
 
-	edict_t *pEdict = engine->PEntityOfEntIndex(params[2]);
+	edict_t *pEdict = PEntityOfEntIndex(params[2]);
 	if (!pEdict || pEdict->IsFree())
 	{
 		return pContext->ThrowNativeError("Entity %d is not valid", params[2]);
@@ -456,7 +493,9 @@ static cell_t SlapPlayer(IPluginContext *pContext, const cell_t *params)
 	bool should_slay = false;
 	if (params[2])
 	{
+#if SOURCE_ENGINE != SE_DARKMESSIAH
 		int *health = (int *)((char *)pEntity + s_health_offs);
+
 		if (*health - params[2] <= 0)
 		{
 			*health = 1;
@@ -464,6 +503,17 @@ static cell_t SlapPlayer(IPluginContext *pContext, const cell_t *params)
 		} else {
 			*health -= params[2];
 		}
+#else
+		float *health = (float *)((char *)pEntity + s_health_offs);
+
+		if (*health - (float)params[2] <= 0)
+		{
+			*health = 1.0f;
+			should_slay = true;
+		} else {
+			*health -= (float)params[2];
+		}
+#endif
 	}
 
 	/* Teleport in a random direction - thank you, Mani!*/
@@ -639,9 +689,49 @@ static cell_t FindEntityByClassname(IPluginContext *pContext, const cell_t *para
 		return -1;
 	}
 
-	return engine->IndexOfEdict(pEdict);
+	return IndexOfEdict(pEdict);
 }
 
+#if SOURCE_ENGINE == SE_LEFT4DEAD
+static cell_t CreateEntityByName(IPluginContext *pContext, const cell_t *params)
+{
+	static ValveCall *pCall = NULL;
+	if (!pCall)
+	{
+		ValvePassInfo pass[4];
+		InitPass(pass[0], Valve_String, PassType_Basic, PASSFLAG_BYVAL);
+		InitPass(pass[1], Valve_POD, PassType_Basic, PASSFLAG_BYVAL);
+		InitPass(pass[2], Valve_Bool, PassType_Basic, PASSFLAG_BYVAL);
+		InitPass(pass[3], Valve_CBaseEntity, PassType_Basic, PASSFLAG_BYVAL);
+		if (!CreateBaseCall("CreateEntityByName", ValveCall_Static, &pass[3], pass, 3, &pCall))
+		{
+			return pContext->ThrowNativeError("\"CreateEntityByName\" not supported by this mod");
+		} else if (!pCall) {
+			return pContext->ThrowNativeError("\"CreateEntityByName\" wrapper failed to initialized");
+		}
+	}
+
+	CBaseEntity *pEntity = NULL;
+	START_CALL();
+	DECODE_VALVE_PARAM(1, vparams, 0);
+	DECODE_VALVE_PARAM(2, vparams, 1);
+	*(bool *)(vptr + 8) = true;
+	FINISH_CALL_SIMPLE(&pEntity);
+
+	if (pEntity == NULL)
+	{
+		return -1;
+	}
+
+	edict_t *pEdict = gameents->BaseEntityToEdict(pEntity);
+	if (!pEdict)
+	{
+		return -1;
+	}
+
+	return IndexOfEdict(pEdict);
+}
+#else
 static cell_t CreateEntityByName(IPluginContext *pContext, const cell_t *params)
 {
 	static ValveCall *pCall = NULL;
@@ -676,8 +766,9 @@ static cell_t CreateEntityByName(IPluginContext *pContext, const cell_t *params)
 		return -1;
 	}
 
-	return engine->IndexOfEdict(pEdict);
+	return IndexOfEdict(pEdict);
 }
+#endif
 
 static cell_t DispatchSpawn(IPluginContext *pContext, const cell_t *params)
 {
@@ -764,7 +855,7 @@ static cell_t DispatchKeyValueVector(IPluginContext *pContext, const cell_t *par
 	{
 		ValvePassInfo pass[3];
 		InitPass(pass[0], Valve_String, PassType_Basic, PASSFLAG_BYVAL);
-#if defined ORANGEBOX_BUILD
+#if SOURCE_ENGINE >= SE_ORANGEBOX
 		InitPass(pass[1], Valve_Vector, PassType_Basic, PASSFLAG_BYVAL);
 #else
 		InitPass(pass[1], Valve_Vector, PassType_Object, PASSFLAG_BYVAL|PASSFLAG_OCTOR|PASSFLAG_OASSIGNOP);
@@ -921,8 +1012,14 @@ static cell_t ActivateEntity(IPluginContext *pContext, const cell_t *params)
 
 static cell_t SetClientInfo(IPluginContext *pContext, const cell_t *params)
 {
+	if (iserver == NULL)
+	{
+		return pContext->ThrowNativeError("IServer interface not supported, file a bug report.");
+	}
+
 	IGamePlayer *player = playerhelpers->GetGamePlayer(params[1]);
-	IClient *pClient = iserver->GetClient(params[1]-1);
+	IClient *pClient = iserver->GetClient(params[1] - 1);
+
 	if (player == NULL || pClient == NULL)
 	{
 		return pContext->ThrowNativeError("Invalid client index %d", params[1]);
@@ -949,6 +1046,21 @@ static cell_t SetClientInfo(IPluginContext *pContext, const cell_t *params)
 		}
 	}
 
+/* TODO: Use UpdateUserSettings function for all engines */
+#if SOURCE_ENGINE == SE_DARKMESSIAH
+	static ValveCall *pUpdateSettings = NULL;
+	if (!pUpdateSettings)
+	{
+		if (!CreateBaseCall("UpdateUserSettings", ValveCall_Entity, NULL, NULL, 0, &pUpdateSettings))
+		{
+			return pContext->ThrowNativeError("\"SetUserCvar\" not supported by this mod");
+		}
+		else if (!pUpdateSettings)
+		{
+			return pContext->ThrowNativeError("\"SetUserCvar\" wrapper failed to initialized");
+		}
+	}
+#else
 	static int changedOffset = -1;
 
 	if (changedOffset == -1)
@@ -958,6 +1070,7 @@ static cell_t SetClientInfo(IPluginContext *pContext, const cell_t *params)
 			return pContext->ThrowNativeError("\"SetUserCvar\" not supported by this mod");
 		}
 	}
+#endif
 
 	unsigned char *CGameClient = (unsigned char *)pClient - 4;
 
@@ -969,8 +1082,15 @@ static cell_t SetClientInfo(IPluginContext *pContext, const cell_t *params)
 	DECODE_VALVE_PARAM(3, vparams, 1);
 	FINISH_CALL_SIMPLE(NULL);
 
+#if SOURCE_ENGINE == SE_DARKMESSIAH
+	unsigned char *args = pUpdateSettings->stk_get();
+	*(void **)args = CGameClient;
+	pUpdateSettings->call->Execute(args, NULL);
+	pUpdateSettings->stk_put(args);
+#else
 	uint8_t* changed = (uint8_t *)(CGameClient + changedOffset);
 	*changed = 1;
+#endif
 
 	return 1;
 }

@@ -29,27 +29,24 @@
  * Version: $Id$
  */
 
-#ifndef _INCLUDE_SOURCEMOD_CCALLWRAPPER_H_
-#define _INCLUDE_SOURCEMOD_CCALLWRAPPER_H_
+#ifndef _INCLUDE_SOURCEMOD_CALLWRAPPER_H_
+#define _INCLUDE_SOURCEMOD_CALLWRAPPER_H_
 
 #include <IBinTools.h>
+#include <sourcehook_pibuilder.h>
 
 using namespace SourceMod;
 
-#define ADDR_CALLEE			0
-#define ADDR_CODEBASE		1
-
-struct VtableInfo 
+enum FuncAddrMethod
 {
-	unsigned int vtblIdx;
-	unsigned int vtblOffs;
-	unsigned int thisOffs;
+	FuncAddr_Direct,
+	FuncAddr_VTable
 };
 
 class CallWrapper : public ICallWrapper
 {
 public:
-	CallWrapper(CallConvention cv, const PassInfo *paramInfo, const PassInfo *retInfo, unsigned int numParams);
+	CallWrapper(const SourceHook::ProtoInfo *protoInfo);
 	~CallWrapper();
 public: //ICallWrapper
 	CallConvention GetCallConvention();
@@ -58,15 +55,25 @@ public: //ICallWrapper
 	unsigned int GetParamCount();
 	void Execute(void *vParamStack, void *retBuffer);
 	void Destroy();
+	const SourceHook::PassInfo *GetSHReturnInfo();
+	SourceHook::ProtoInfo::CallConvention GetSHCallConvention();
+	const SourceHook::PassInfo *GetSHParamInfo(unsigned int num);
+	unsigned int GetParamOffset(unsigned int num);
 public:
-	inline void deleteThis() { delete this; }
-	void *m_Addrs[4];
-	VtableInfo m_VtInfo;
+	void SetCalleeAddr(void *addr);
+	void SetCodeBaseAddr(void *addr);
+	void *GetCalleeAddr();
+	void *GetCodeBaseAddr();
+
+	void SetMemFuncInfo(const SourceHook::MemFuncInfo *funcInfo);
+	SourceHook::MemFuncInfo *GetMemFuncInfo();
 private:
-	CallConvention m_Cv;
 	PassEncode *m_Params;
+	SourceHook::ProtoInfo m_Info;
 	PassInfo *m_RetParam;
-	unsigned int m_NumParams;
+	void *m_AddrCallee;
+	void *m_AddrCodeBase;
+	SourceHook::MemFuncInfo m_FuncInfo;
 };
 
-#endif //_INCLUDE_SOURCEMOD_CCALLWRAPPER_H_
+#endif //_INCLUDE_SOURCEMOD_CALLWRAPPER_H_

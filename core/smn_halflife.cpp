@@ -97,7 +97,7 @@ static cell_t CreateFakeClient(IPluginContext *pContext, const cell_t *params)
 		return 0;
 	}
 
-	return engine->IndexOfEdict(pEdict);
+	return IndexOfEdict(pEdict);
 }
 
 static cell_t SetFakeClientConVar(IPluginContext *pContext, const cell_t *params)
@@ -444,6 +444,10 @@ static cell_t GuessSDKVersion(IPluginContext *pContext, const cell_t *params)
 	if (version == SOURCE_ENGINE_ORIGINAL)
 	{
 		return 10;
+	}
+	else if (version == SOURCE_ENGINE_DARKMESSIAH)
+	{
+		return 15;
 	}
 	else if (version == SOURCE_ENGINE_EPISODEONE)
 	{

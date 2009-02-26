@@ -5,6 +5,7 @@ SMSDK = ../..
 SRCDS_BASE = ~/srcds
 HL2SDK_ORIG = ../../../hl2sdk
 HL2SDK_OB = ../../../hl2sdk-ob
+HL2SDK_L4D = ../../../hl2sdk-l4d
 MMSOURCE17 = ../../../mmsource-1.7
 
 #####################################
@@ -13,10 +14,7 @@ MMSOURCE17 = ../../../mmsource-1.7
 
 PROJECT = bintools
 
-#Uncomment for Metamod: Source enabled extension
-#USEMETA = true
-
-OBJECTS = sdk/smsdk_ext.cpp extension.cpp jit_call.cpp CallWrapper.cpp CallMaker.cpp
+OBJECTS = sdk/smsdk_ext.cpp extension.cpp jit_call.cpp CallWrapper.cpp CallMaker.cpp HookWrapper.cpp jit_hook.cpp
 
 ##############################################
 ### CONFIGURE ANY OTHER FLAGS/OPTIONS HERE ###
@@ -31,22 +29,38 @@ CPP = gcc
 override ENGSET = false
 ifeq "$(ENGINE)" "original"
 	HL2SDK = $(HL2SDK_ORIG)
-	HL2PUB = $(HL2SDK_ORIG)/public
-	HL2LIB = $(HL2SDK_ORIG)/linux_sdk
+	HL2PUB = $(HL2SDK)/public
+	HL2LIB = $(HL2SDK)/linux_sdk
+	CFLAGS += -DSOURCE_ENGINE=1
 	METAMOD = $(MMSOURCE17)/core-legacy
 	INCLUDE += -I$(HL2SDK)/public/dlls
+	INCLUDE += -I$(MMSOURCE17)/core -I$(MMSOURCE17)/core/sourcehook
 	SRCDS = $(SRCDS_BASE)
 	override ENGSET = true
 endif
 ifeq "$(ENGINE)" "orangebox"
 	HL2SDK = $(HL2SDK_OB)
-	HL2PUB = $(HL2SDK_OB)/public
-	HL2LIB = $(HL2SDK_OB)/lib/linux
-	CFLAGS += -DORANGEBOX_BUILD
+	HL2PUB = $(HL2SDK)/public
+	HL2LIB = $(HL2SDK)/lib/linux
+	CFLAGS += -DSOURCE_ENGINE=3
 	METAMOD = $(MMSOURCE17)/core
 	INCLUDE += -I$(HL2SDK)/public/game/server
 	SRCDS = $(SRCDS_BASE)/orangebox
 	override ENGSET = true
+	USEMETA = true
+	CFLAGS += -DHOOKING_ENABLED
+endif
+ifeq "$(ENGINE)" "left4dead"
+	HL2SDK = $(HL2SDK_L4D)
+	HL2PUB = $(HL2SDK)/public
+	HL2LIB = $(HL2SDK)/lib/linux
+	CFLAGS += -DSOURCE_ENGINE=4
+	METAMOD = $(MMSOURCE17)/core
+	INCLUDE += -I$(HL2SDK)/public/game/server
+	SRCDS = $(SRCDS_BASE)/l4d
+	override ENGSET = true
+	USEMETA = true
+	CFLAGS += -DHOOKING_ENABLED
 endif
 
 ifeq "$(USEMETA)" "true"
@@ -55,7 +69,9 @@ ifeq "$(USEMETA)" "true"
 	LINK += $(LINK_HL2)
 
 	INCLUDE += -I. -I.. -Isdk -I$(HL2PUB) -I$(HL2PUB)/engine -I$(HL2PUB)/tier0 -I$(HL2PUB)/tier1 \
-		-I$(METAMOD) -I$(METAMOD)/sourcehook -I$(SMSDK)/public -I$(SMSDK)/public/sourcepawn
+		-I$(METAMOD) -I$(METAMOD)/sourcehook -I$(SMSDK)/public -I$(SMSDK)/public/sourcepawn \
+		-I$(SMSDK)/public/extensions -I$(SMSDK)/public/jit -I$(SMSDK)/public/jit/x86
+	CFLAGS += -DSE_EPISODEONE=1 -DSE_DARKMESSIAH=2 -DSE_ORANGEBOX=3 -DSE_LEFT4DEAD=4
 else
 	INCLUDE += -I. -I.. -Isdk -I$(SMSDK)/public -I$(SMSDK)/public/extensions -I$(SMSDK)/public/jit \
 		-I$(SMSDK)/public/jit/x86 -I$(SMSDK)/public/sourcepawn
@@ -82,6 +98,8 @@ endif
 
 ifeq "$(USEMETA)" "true"
 	BIN_DIR := $(BIN_DIR).$(ENGINE)
+else
+	BIN_DIR := $(BIN_DIR).original
 endif
 
 OS := $(shell uname -s)
@@ -114,7 +132,7 @@ all: check
 
 check:
 	if [ "$(USEMETA)" = "true" ] && [ "$(ENGSET)" = "false" ]; then \
-		echo "You must supply ENGINE=orangebox or ENGINE=original"; \
+		echo "You must supply ENGINE=left4dead or ENGINE=orangebox or ENGINE=original"; \
 		exit 1; \
 	fi
 
