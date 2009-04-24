@@ -44,6 +44,13 @@ PerformRename(client, target)
 	}
 	else /* Used on CSS and EP1 / older engine */
 	{
+		if (!IsPlayerAlive(target)) /* Lets tell them about the player renamed on the next round since they're dead. */
+		{
+			decl String:m_TargetName[MAX_NAME_LENGTH];
+
+			GetClientName(target, m_TargetName, sizeof(m_TargetName));
+			ReplyToCommand(client, "[SM] %t", "Dead Player Rename", m_TargetName);
+		}
 		ClientCommand(target, "name %s", g_NewName[target]);
 	}
 	g_NewName[target][0] = '\0';

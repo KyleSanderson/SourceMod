@@ -51,8 +51,8 @@ new Handle:g_MapList = INVALID_HANDLE;
 new g_MapListSerial = -1;
 
 new g_CurrentMapStartTime;
- 
-public OnPluginStart()
+
+public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 {
 	decl String:game[128];
 	GetGameFolderName(game, sizeof(game));
@@ -60,7 +60,17 @@ public OnPluginStart()
 	if (StrEqual(game, "left4dead", false)
 			|| StrEqual(game, "dystopia", false)
 			|| StrEqual(game, "synergy", false))
-		return;
+	{
+		strcopy(error, err_max, "Nextmap is incompatible with this game");
+		return APLRes_SilentFailure;
+	}
+
+	return APLRes_Success;
+}
+
+
+public OnPluginStart()
+{
 
 	LoadTranslations("common.phrases");
 	LoadTranslations("nextmap.phrases");
@@ -83,14 +93,6 @@ public OnMapStart()
  
 public OnConfigsExecuted()
 {
-	decl String:game[128];
-	GetGameFolderName(game, sizeof(game));
-
-	if (StrEqual(game, "left4dead", false)
-			|| StrEqual(game, "dystopia", false)
-			|| StrEqual(game, "synergy", false))
-		return;
-
 	decl String:lastMap[64], String:currentMap[64];
 	GetNextMap(lastMap, sizeof(lastMap));
 	GetCurrentMap(currentMap, 64);
