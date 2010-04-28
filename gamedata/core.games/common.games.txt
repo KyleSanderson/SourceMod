@@ -135,6 +135,10 @@
 			"game"					"gesource"
 			"game"					"NeotokyoSource"
 			"game"					"bg2"
+			"game"					"cspromod"
+			"game"					"FortressForever"
+			"game"					"zps"
+			"game"					"gesource"
 		}
 
 		"Keys"
@@ -154,6 +158,11 @@
 			"game"					"empires"
 			"game"					"NeotokyoSource"
 			"game"					"bg2"
+			"game"					"cspromod"
+			"game"					"pvkii"
+			"game"					"FortressForever"
+			"game"					"zps"
+			"game"					"gesource"
 			"game"					"obsidian"
 		}
 		
@@ -178,6 +187,10 @@
 			"game"					"zombie_master"
 			"game"					"bg2"
  			"game"					"insurgency"
+			"game"					"cspromod"
+			"game"					"pvkii"
+			"game"					"zps"
+			"game"					"gesource"
 		}
 		
 		"Keys"

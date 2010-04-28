@@ -17,11 +17,9 @@
 		"#supported"
 		{
 			"game"		"cstrike"
-			"game"		"garrysmod"
 			"game"		"hl2mp"
 			"game"		"ship"
 			"game"		"insurgency"
-			"game"		"pvkii"
 			"game"		"sourceforts"
 			"game"		"FortressForever"
 			"game"		"empires"
@@ -29,6 +27,7 @@
 			"game"		"hidden"
 			"game"		"zombie_master"
 			"game"		"NeotokyoSource"
+			"game"		"cspromod"
 		}
 		
 		"Offsets"

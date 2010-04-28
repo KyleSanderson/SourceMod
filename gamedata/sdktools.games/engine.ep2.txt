@@ -21,6 +21,10 @@
 			"game"		"empires"
 			"game"		"synergy"
 			"game"		"bg2"
+			"game"		"garrysmod"
+			"game"		"pvkii"
+			"game"		"gesource"
+			"game"		"obsidian"
 		}
 
 		"Offsets"
@@ -69,7 +73,7 @@
 		{
 			"game"		"ageofchivalry"
 			"game"		"zps"
-			"game"		"empires"
+			"game"		"pvkii"
 		}
 
 		"Signatures"
@@ -96,8 +100,7 @@
 		{
 			"game"		"ageofchivalry"
 			"game"		"zps"
-			"game"		"empires"
-			"game"		"synergy"
+			"game"		"pvkii"
 		}
 		
 		"Signatures"
@@ -122,6 +125,9 @@
 			"game"		"empires"
 			"game"		"synergy"
 			"game"		"bg2"
+			"game"		"garrysmod"
+			"game"		"pvkii"
+			"game"		"gesource"
 		}
 		
 		"Offsets"

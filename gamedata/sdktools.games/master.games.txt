@@ -92,7 +92,6 @@
 	
 	"game.garrysmod.txt"
 	{
-		"engine"	"original"
 		"game"		"garrysmod"
 	}
 	
@@ -142,5 +141,13 @@
 	"game.bg2.txt"
 	{
 		"game"		"bg2"
+	}
+	"game.cspromod.txt"
+	{
+		"game"		"cspromod"
+	}
+	"game.gesource.txt"
+	{
+		"game"		"gesource"
 	}
 }

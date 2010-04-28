@@ -159,6 +159,177 @@ cell_t TF2_RemoveDisguise(IPluginContext *pContext, const cell_t *params)
 	return 1;
 }
 
+cell_t TF2_AddCondition(IPluginContext *pContext, const cell_t *params)
+{
+	static ICallWrapper *pWrapper = NULL;
+
+	// CTFPlayerShared::AddCond(int, float)
+	if (!pWrapper)
+	{
+		REGISTER_NATIVE_ADDR("AddCondition", 
+			PassInfo pass[2]; \
+			pass[0].flags = PASSFLAG_BYVAL; \
+			pass[0].size = sizeof(int); \
+			pass[0].type = PassType_Basic; \
+			pass[1].flags = PASSFLAG_BYVAL; \
+			pass[1].size = sizeof(float); \
+			pass[1].type = PassType_Basic; \
+			pWrapper = g_pBinTools->CreateCall(addr, CallConv_ThisCall, NULL, pass, 2))
+	}
+
+	CBaseEntity *pEntity;
+	if (!(pEntity = UTIL_GetCBaseEntity(params[1], true)))
+	{
+		return pContext->ThrowNativeError("Client index %d is not valid", params[1]);
+	}
+
+	void *obj = (void *)((uint8_t *)pEntity + playerSharedOffset->actual_offset);
+
+	unsigned char vstk[sizeof(void *) + sizeof(int) + sizeof(float)];
+	unsigned char *vptr = vstk;
+
+	*(void **)vptr = obj;
+	vptr += sizeof(void *);
+	*(int *)vptr = params[2];
+	vptr += sizeof(int);
+	*(float *)vptr = *(float *)&params[3];
+
+	pWrapper->Execute(vstk, NULL);
+
+	return 1;
+}
+
+cell_t TF2_RemoveCondition(IPluginContext *pContext, const cell_t *params)
+{
+	static ICallWrapper *pWrapper = NULL;
+
+	// CTFPlayerShared::RemoveCond(int)
+	if (!pWrapper)
+	{
+		REGISTER_NATIVE_ADDR("RemoveCondition", 
+			PassInfo pass[1]; \
+			pass[0].flags = PASSFLAG_BYVAL; \
+			pass[0].size = sizeof(int); \
+			pass[0].type = PassType_Basic; \
+			pWrapper = g_pBinTools->CreateCall(addr, CallConv_ThisCall, NULL, pass, 1))
+	}
+
+	CBaseEntity *pEntity;
+	if (!(pEntity = UTIL_GetCBaseEntity(params[1], true)))
+	{
+		return pContext->ThrowNativeError("Client index %d is not valid", params[1]);
+	}
+
+	void *obj = (void *)((uint8_t *)pEntity + playerSharedOffset->actual_offset);
+
+	unsigned char vstk[sizeof(void *) + sizeof(int)];
+	unsigned char *vptr = vstk;
+
+	*(void **)vptr = obj;
+	vptr += sizeof(void *);
+	*(int *)vptr = params[2];
+
+	pWrapper->Execute(vstk, NULL);
+
+	return 1;
+}
+
+cell_t TF2_StunPlayer(IPluginContext *pContext, const cell_t *params)
+{
+	static ICallWrapper *pWrapper = NULL;
+
+	// CTFPlayerShared::StunPlayer(float, float, int, CTFPlayer *)
+	if (!pWrapper)
+	{
+		REGISTER_NATIVE_ADDR("StunPlayer", 
+			PassInfo pass[4]; \
+			pass[0].flags = PASSFLAG_BYVAL; \
+			pass[0].size = sizeof(float); \
+			pass[0].type = PassType_Basic; \
+			pass[1].flags = PASSFLAG_BYVAL; \
+			pass[1].size = sizeof(float); \
+			pass[1].type = PassType_Basic; \
+			pass[2].flags = PASSFLAG_BYVAL; \
+			pass[2].size = sizeof(int); \
+			pass[2].type = PassType_Basic; \
+			pass[3].flags = PASSFLAG_BYVAL; \
+			pass[3].size = sizeof(CBaseEntity *); \
+			pass[3].type = PassType_Basic; \
+			pWrapper = g_pBinTools->CreateCall(addr, CallConv_ThisCall, NULL, pass, 4))
+	}
+
+	CBaseEntity *pEntity;
+	if (!(pEntity = UTIL_GetCBaseEntity(params[1], true)))
+	{
+		return pContext->ThrowNativeError("Client index %d is not valid", params[1]);
+	}
+
+	bool bByPlayer = (params[5] != 0);
+	CBaseEntity *pAttacker = NULL;
+	if (bByPlayer && !(pAttacker = UTIL_GetCBaseEntity(params[5], true)))
+	{
+		return pContext->ThrowNativeError("Attacker index %d is not valid", params[5]);
+	}
+
+	void *obj = (void *)((uint8_t *)pEntity + playerSharedOffset->actual_offset);
+
+	unsigned char vstk[sizeof(void *) + 2*sizeof(float) + sizeof(int) + sizeof(CBaseEntity *)];
+	unsigned char *vptr = vstk;
+
+	*(void **)vptr = obj;
+	vptr += sizeof(void *);
+	*(float *)vptr = sp_ctof(params[2]);
+	vptr += sizeof(float);
+	*(float *)vptr = sp_ctof(params[3]);
+	vptr += sizeof(float);
+	*(int *)vptr = params[4];
+	vptr += sizeof(int);
+	*(CBaseEntity **)vptr = pAttacker;
+
+	pWrapper->Execute(vstk, NULL);
+
+	return 1;
+}
+
+cell_t TF2_SetPowerplayEnabled(IPluginContext *pContext, const cell_t *params)
+{
+	static ICallWrapper *pWrapper = NULL;
+
+	// CTFPlayer::SetPowerPlayEnabled(bool)
+	if (!pWrapper)
+	{
+		REGISTER_NATIVE_ADDR("SetPowerplayEnabled", 
+			PassInfo pass[1]; \
+			pass[0].flags = PASSFLAG_BYVAL; \
+			pass[0].size = sizeof(bool); \
+			pass[0].type = PassType_Basic; \
+			pWrapper = g_pBinTools->CreateCall(addr, CallConv_ThisCall, NULL, pass, 1))
+	}
+
+	CBaseEntity *pEntity;
+	if (!(pEntity = UTIL_GetCBaseEntity(params[1], true)))
+	{
+		return pContext->ThrowNativeError("Client index %d is not valid", params[1]);
+	}
+
+	bool bEnablePP = false;
+	if (params[2] != 0)
+	{
+		bEnablePP = true;
+	}
+
+	unsigned char vstk[sizeof(void *) + sizeof(bool)];
+	unsigned char *vptr = vstk;
+
+	*(void **)vptr = (void *)pEntity;
+	vptr += sizeof(void *);
+	*(bool *)vptr = bEnablePP;
+
+	pWrapper->Execute(vstk, NULL);
+
+	return 1;
+}
+
 cell_t TF2_Respawn(IPluginContext *pContext, const cell_t *params)
 {
 	static ICallWrapper *pWrapper = NULL;
@@ -201,6 +372,28 @@ cell_t TF2_Respawn(IPluginContext *pContext, const cell_t *params)
 	return 1;
 }
 
+cell_t TF2_Regenerate(IPluginContext *pContext, const cell_t *params)
+{
+	static ICallWrapper *pWrapper = NULL;
+
+	//CTFPlayer::Regenerate()
+
+	if (!pWrapper)
+	{
+		REGISTER_NATIVE_ADDR("Regenerate", 
+			pWrapper = g_pBinTools->CreateCall(addr, CallConv_ThisCall, NULL, NULL, 0));
+	}
+
+	CBaseEntity *pEntity;
+	if (!(pEntity = UTIL_GetCBaseEntity(params[1], true)))
+	{
+		return pContext->ThrowNativeError("Client index %d is not valid", params[1]);
+	}
+	pWrapper->Execute(&pEntity, NULL);
+
+	return 1;
+}
+
 cell_t TF2_GetResourceEntity(IPluginContext *pContext, const cell_t *params)
 {
 	return g_resourceEntity;
@@ -223,5 +416,10 @@ sp_nativeinfo_t g_TFNatives[] =
 	{"TF2_RemovePlayerDisguise",	TF2_RemoveDisguise},
 	{"TF2_GetResourceEntity",		TF2_GetResourceEntity},
 	{"TF2_GetClass",				TF2_GetClass},
+	{"TF2_RegeneratePlayer",		TF2_Regenerate},
+	{"TF2_AddCondition",			TF2_AddCondition},
+	{"TF2_RemoveCondition",			TF2_RemoveCondition},
+	{"TF2_SetPlayerPowerPlay",		TF2_SetPowerplayEnabled},
+	{"TF2_StunPlayer",				TF2_StunPlayer},
 	{NULL,							NULL}
 };
