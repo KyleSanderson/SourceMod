@@ -58,7 +58,8 @@
 #define TF_CONDFLAG_CHARGING        (1 << 17)
 #define TF_CONDFLAG_DEMOBUFF        (1 << 18)
 #define TF_CONDFLAG_CRITCOLA        (1 << 19)
-#define TF_CONDFLAG_HEALING         (1 << 20)
+#define TF_CONDFLAG_INHEALRADIUS    (1 << 20)
+#define TF_CONDFLAG_HEALING         (1 << 21)
 #define TF_CONDFLAG_ONFIRE          (1 << 22)
 #define TF_CONDFLAG_OVERHEALED      (1 << 23)
 #define TF_CONDFLAG_JARATED         (1 << 24)
@@ -219,7 +220,8 @@ enum {
 	TF_FLAGEVENT_PICKEDUP = 1,
 	TF_FLAGEVENT_CAPTURED,
 	TF_FLAGEVENT_DEFENDED,
-	TF_FLAGEVENT_DROPPED
+	TF_FLAGEVENT_DROPPED,
+	TF_FLAGEVENT_RETURNED
 };
 
 enum TFResourceType
