@@ -35,13 +35,13 @@ Everything outside of this is like a movie I once saw.
 THIS IS NOT AN EXIT.
 ABANDON ALL HOPE YE WHO ENTER HERE.
 egg!
-blimey
+blimey!
 crab
 jibbly jibbly jibbly
 oh mercurial
 hi
 oh, hello
-horrible is horrible
+horrible is horrible is rukia
 i'm gonna get u good
 the end
 The Patty Winters show this morning was about how terrible sawce is, same as yesterday's show; however, things are looking up for tomorrow.
@@ -61,3 +61,4 @@ a newline embiggens the noblest of files
 EmitAmbientSawce()
 It's so watery... and yet there's a smakc of ham to it!
 You gonna squeal before we cook ya?
+\n
