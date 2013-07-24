@@ -194,6 +194,11 @@ public:
 	}
 	IDBDriver *GetDriver()
 	{
+		if (!m_pDatabase)
+		{
+			return NULL;
+		}
+
 		return m_pDatabase->GetDriver();
 	}
 	void RunThreadPart()
