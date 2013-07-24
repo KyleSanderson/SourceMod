@@ -13,6 +13,7 @@ if AMBuild.target['platform'] == 'linux' or AMBuild.target['platform'] == 'darwi
 	link = [lib,
           '-lz',
           '-lpthread',
+		  '-lrt',
           '-lm']
 	binary.RelinkIfNewer(lib)
 	binary['POSTLINKFLAGS'].extend(link)
