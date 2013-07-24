@@ -148,15 +148,19 @@ void TimerNatives::OnTimerEnd(ITimer *pTimer, void *pData)
 	HandleError herr;
 	TimerInfo *pInfo = reinterpret_cast<TimerInfo *>(pData);
 	Handle_t usrhndl = static_cast<Handle_t>(pInfo->UserData);
-
-	sec.pOwner = pInfo->pContext->GetIdentity();
-	sec.pIdentity = g_pCoreIdent;
-
-	if (pInfo->Flags & TIMER_DATA_HNDL_CLOSE)
+	IPluginContext * pContext = pInfo->pContext;
+	
+	if (pContext)
 	{
-		if ((herr=handlesys->FreeHandle(usrhndl, &sec)) != HandleError_None)
+		sec.pOwner = pContext->GetIdentity();
+		sec.pIdentity = g_pCoreIdent;
+	}
+
+	if (usrhndl && (pInfo->Flags & TIMER_DATA_HNDL_CLOSE))
+	{
+		if (((herr=handlesys->FreeHandle(usrhndl, (pContext ? &sec : NULL))) != HandleError_None) && pContext)
 		{
-			g_DbgReporter.GenerateError(pInfo->pContext, pInfo->Hook->GetFunctionID(), 
+			g_DbgReporter.GenerateError(pContext, pInfo->Hook->GetFunctionID(), 
 							  	 SP_ERROR_NATIVE, 
 							  	 "Invalid data handle %x (error %d) passed during timer end with TIMER_DATA_HNDL_CLOSE",
 							  	 usrhndl, herr);
@@ -165,9 +169,9 @@ void TimerNatives::OnTimerEnd(ITimer *pTimer, void *pData)
 
 	if (pInfo->TimerHandle != BAD_HANDLE)
 	{
-		if ((herr=handlesys->FreeHandle(pInfo->TimerHandle, &sec)) != HandleError_None)
+		if (((herr=handlesys->FreeHandle(pInfo->TimerHandle, (pContext ? &sec : NULL))) != HandleError_None) && pContext)
 		{
-			g_DbgReporter.GenerateError(pInfo->pContext, pInfo->Hook->GetFunctionID(), 
+			g_DbgReporter.GenerateError(pContext, pInfo->Hook->GetFunctionID(), 
 				SP_ERROR_NATIVE, 
 				"Invalid timer handle %x (error %d) during timer end, displayed function is timer callback, not the stack trace", 
 				pInfo->TimerHandle, herr);
