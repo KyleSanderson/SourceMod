@@ -102,7 +102,7 @@ void Knight::KE_DestroyPageAllocator(KePageAllocator *alloc)
 #error "Unsupported platform"
 #endif
 		delete info;
-		next = info;
+		info = next;
 	}
 
 	info = alloc->free_pages;
