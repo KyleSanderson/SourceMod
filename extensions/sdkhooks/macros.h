@@ -51,5 +51,8 @@
 		SET_PRE_##supportsPre(Weapon##gamedataname) \
 		SET_POST_##supportsPost(Weapon##gamedataname)
 
+#define TYPELOOP \
+	for(int type = ((static_cast<int>(SDKHook_MAXHOOKS)) - 1); type >= 0; --type)
+
 #define HOOKLOOP \
-	for(int i = g_HookList.Count() - 1; i >= 0; i--)
+	for(int i = g_HookList[type].Count() - 1; i >= 0; --i)

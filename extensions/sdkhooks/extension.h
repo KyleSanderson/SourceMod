@@ -102,7 +102,6 @@ class HookList
 {
 public:
 	int entity;
-	SDKHookType type;
 	IPluginFunction *callback;
 };
 
@@ -225,7 +224,7 @@ public:
 	void SetupHooks();
 
 	HookReturn Hook(int entity, SDKHookType type, IPluginFunction *callback);
-	void Unhook(int index);
+	void Unhook(SDKHookType type, int index);
 
 	/**
 	 * IServerGameDLL & IVEngineServer Hook Handlers
@@ -292,7 +291,7 @@ private:
 };
 
 extern CGlobalVars *gpGlobals;
-extern CUtlVector<HookList> g_HookList;
+extern CUtlVector<HookList> g_HookList[SDKHook_MAXHOOKS];
 
 extern ICvar *icvar;
 #endif // _INCLUDE_SOURCEMOD_EXTENSION_PROPER_H_

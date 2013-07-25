@@ -33,6 +33,7 @@
 #ifndef _INCLUDE_SOURCEMOD_NATIVES_PROPER_H_
 #define _INCLUDE_SOURCEMOD_NATIVES_PROPER_H_
 
+#include "macros.h"
 #include "util.h"
 
 cell_t Native_Hook(IPluginContext *pContext, const cell_t *params);

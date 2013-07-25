@@ -94,7 +94,7 @@ SDKHooks g_Interface;
 SMEXT_LINK(&g_Interface);
 
 CGlobalVars *gpGlobals;
-CUtlVector<HookList> g_HookList;
+CUtlVector<HookList> g_HookList[SDKHook_MAXHOOKS];
 
 CBitVec<NUM_ENT_ENTRIES> m_EntityExists;
 
@@ -235,7 +235,7 @@ bool SDKHooks::SDK_OnLoad(char *error, size_t maxlength, bool late)
 	for (IHandleEntity *pEnt = (IHandleEntity *)servertools->FirstEntity(); pEnt; pEnt = (IHandleEntity *)servertools->NextEntity((CBaseEntity *)pEnt))
 	{
 		hndl = pEnt->GetRefEHandle();
-		if (hndl == INVALID_EHANDLE_INDEX || !hndl.IsValid())
+		if (!hndl.IsValid())
 			continue;
 		
 		index = hndl.GetEntryIndex();
@@ -295,8 +295,9 @@ void SDKHooks::SDK_OnAllLoaded()
 void SDKHooks::SDK_OnUnload()
 {
 	// Remove left over hooks
-	HOOKLOOP
-		Unhook(i);
+	TYPELOOP
+		HOOKLOOP
+			Unhook(static_cast<SDKHookType>(type), i);
 
 	KILL_HOOK_IF_ACTIVE(g_hookOnLevelInit);
 	KILL_HOOK_IF_ACTIVE(g_hookOnGetMapEntitiesString);
@@ -371,11 +372,13 @@ void SDKHooks::OnPluginLoaded(IPlugin *plugin)
 void SDKHooks::OnPluginUnloaded(IPlugin *plugin)
 {
 	IPluginContext *plugincontext = plugin->GetBaseContext();
-	HOOKLOOP
-	{
-		if(g_HookList[i].callback->GetParentContext() == plugincontext)
-			Unhook(i);
-	}
+	TYPELOOP
+		HOOKLOOP
+		{
+			const HookList &Hook = g_HookList[type][i];
+			if(Hook.callback->GetParentContext() == plugincontext)
+				Unhook(static_cast<SDKHookType>(type), i);
+		}
 
 	if (g_pOnLevelInit->GetFunctionCount() == 0)
 	{
@@ -424,10 +427,11 @@ cell_t SDKHooks::Call(int entity, SDKHookType type, int other)
 
 	HOOKLOOP
 	{
-		if(g_HookList[i].entity != entity || g_HookList[i].type != type)
+		const HookList &Hook = g_HookList[type][i];
+		if(Hook.entity != entity)
 			continue;
 
-		callback = g_HookList[i].callback;
+		callback = Hook.callback;
 		callback->PushCell(entity);
 		if(other > -2)
 			callback->PushCell(other);
@@ -517,7 +521,8 @@ HookReturn SDKHooks::Hook(int entity, SDKHookType type, IPluginFunction *callbac
 	bool bHooked = false;
 	HOOKLOOP
 	{
-		if (g_HookList[i].entity == entity && g_HookList[i].type == type)
+		const HookList &Hook = g_HookList[type][i];
+		if (Hook.entity == entity)
 		{
 			bHooked = true;
 			break;
@@ -652,38 +657,42 @@ HookReturn SDKHooks::Hook(int entity, SDKHookType type, IPluginFunction *callbac
 	// Add hook to hook list
 	HookList hook;
 	hook.entity = entity;
-	hook.type = type;
 	hook.callback = callback;
-	g_HookList.AddToTail(hook);
+	g_HookList[type].AddToTail(hook);
 #ifdef SDKHOOKSDEBUG
-	META_CONPRINTF("DEBUG: Adding to hooklist (ent%d, type%s, cb%d). Total hook count %d\n", entity, g_szHookNames[type], callback, g_HookList.Count());
+	META_CONPRINTF("DEBUG: Adding to hooklist (ent%d, type%s, cb%d). Total hook count %d\n", entity, g_szHookNames[type], callback, g_HookList[type].Count());
 #endif
 	return HookRet_Successful;
 }
 
-void SDKHooks::Unhook(int index)
+void SDKHooks::Unhook(SDKHookType type, int index)
 {
-	CBaseEntity *pEnt = gamehelpers->ReferenceToEntity(g_HookList[index].entity);
+	cell_t Ref = g_HookList[type][index].entity;
+	CBaseEntity *pEnt = gamehelpers->ReferenceToEntity(Ref);
 	if(!pEnt)
 		return;
 
-	int iHooks = 0;
+	bool bHooked = false;
 	HOOKLOOP
 	{
-		if (g_HookList[i].entity == g_HookList[index].entity && g_HookList[i].type == g_HookList[index].type)
+		const HookList &Hook = g_HookList[type][i];
+		if (Hook.entity != Ref)
 		{
-			iHooks++;
-#ifdef SDKHOOKSDEBUG
-			META_CONPRINTF("DEBUG: Found hook %d on entity %d\n", i, g_HookList[index].entity);
-#endif
+			continue;
 		}
+		
+		bHooked = true;
+#ifdef SDKHOOKSDEBUG
+		META_CONPRINTF("DEBUG: Found hook %d on entity %d\n", i, Ref);
+#endif
+		break;
 	}
-	if (iHooks == 1)
+	if (!bHooked)
 	{
 #ifdef SDKHOOKSDEBUG
-		META_CONPRINTF("DEBUG: Removing hook for hooktype %d\n", g_HookList[index].type);
+		META_CONPRINTF("DEBUG: Removing hook for hooktype %d\n", type);
 #endif
-		switch(g_HookList[index].type)
+		switch(type)
 		{
 			case SDKHook_EndTouch:
 				SH_REMOVE_MANUALHOOK(EndTouch, pEnt, SH_MEMBER(&g_Interface, &SDKHooks::Hook_EndTouch), false);
@@ -808,7 +817,7 @@ void SDKHooks::Unhook(int index)
 				return;
 		}
 	}
-	g_HookList.Remove(index);
+	g_HookList[type].Remove(index);
 }
 
 
@@ -902,6 +911,7 @@ void SDKHooks::Hook_EndTouchPost(CBaseEntity *pOther)
 
 void SDKHooks::Hook_FireBulletsPost(const FireBulletsInfo_t &info)
 {
+	static const SDKHookType type = SDKHook_FireBulletsPost;
 	int entity = gamehelpers->EntityToBCompatRef(META_IFACEPTR(CBaseEntity));
 
 	IGamePlayer *pPlayer = playerhelpers->GetGamePlayer(entity);
@@ -917,10 +927,11 @@ void SDKHooks::Hook_FireBulletsPost(const FireBulletsInfo_t &info)
 
 	HOOKLOOP
 	{
-		if(g_HookList[i].entity != entity || g_HookList[i].type != SDKHook_FireBulletsPost)
+		const HookList &Hook = g_HookList[type][i];
+		if(Hook.entity != entity)
 			continue;
 
-		callback = g_HookList[i].callback;
+		callback = Hook.callback;
 		callback->PushCell(entity);
 		callback->PushCell(info.m_iShots);
 		callback->PushString(weapon?weapon:"");
@@ -933,6 +944,7 @@ void SDKHooks::Hook_FireBulletsPost(const FireBulletsInfo_t &info)
 #ifdef GETMAXHEALTH_IS_VIRTUAL
 int SDKHooks::Hook_GetMaxHealth()
 {
+	static const SDKHookType type = SDKHook_GetMaxHealth;
 	CBaseEntity *pEntity = META_IFACEPTR(CBaseEntity);
 	int original_max = SH_MCALL(pEntity, GetMaxHealth)();
 	int entity = gamehelpers->EntityToBCompatRef(pEntity);
@@ -944,10 +956,11 @@ int SDKHooks::Hook_GetMaxHealth()
 
 	HOOKLOOP
 	{
-		if (g_HookList[i].entity != entity || g_HookList[i].type != SDKHook_GetMaxHealth)
+		const HookList &Hook = g_HookList[type][i];
+		if (Hook.entity != entity)
 			continue;
 
-		callback = g_HookList[i].callback;
+		callback = Hook.callback;
 		callback->PushCell(entity);
 		callback->PushCellByRef(&new_max);
 		callback->Execute(&res);
@@ -967,6 +980,7 @@ void SDKHooks::Hook_GroundEntChangedPost()
 
 int SDKHooks::Hook_OnTakeDamage(CTakeDamageInfoHack &info)
 {
+	static const SDKHookType type = SDKHook_OnTakeDamage;
 	int entity = gamehelpers->EntityToBCompatRef(META_IFACEPTR(CBaseEntity));
 	int attacker = info.GetAttacker();
 	int inflictor = info.GetInflictor();
@@ -985,10 +999,11 @@ int SDKHooks::Hook_OnTakeDamage(CTakeDamageInfoHack &info)
 
 	HOOKLOOP
 	{
-		if(g_HookList[i].entity != entity || g_HookList[i].type != SDKHook_OnTakeDamage)
+		const HookList &Hook = g_HookList[type][i];
+		if(Hook.entity != entity)
 			continue;
 
-		callback = g_HookList[i].callback;
+		callback = Hook.callback;
 		callback->PushCell(entity);
 		callback->PushCellByRef(&attacker);
 		callback->PushCellByRef(&inflictor);
@@ -1044,15 +1059,17 @@ int SDKHooks::Hook_OnTakeDamage(CTakeDamageInfoHack &info)
 
 int SDKHooks::Hook_OnTakeDamagePost(CTakeDamageInfoHack &info)
 {
+	static const SDKHookType type = SDKHook_OnTakeDamagePost;
 	int entity = gamehelpers->EntityToBCompatRef(META_IFACEPTR(CBaseEntity));
 	IPluginFunction *callback = NULL;
 
 	HOOKLOOP
 	{
-		if(g_HookList[i].entity != entity || g_HookList[i].type != SDKHook_OnTakeDamagePost)
+		const HookList &Hook = g_HookList[type][i];
+		if(Hook.entity != entity)
 			continue;
 
-		callback = g_HookList[i].callback;
+		callback = Hook.callback;
 		callback->PushCell(entity);
 		callback->PushCell(info.GetAttacker());
 		callback->PushCell(info.GetInflictor());
@@ -1098,16 +1115,18 @@ void SDKHooks::Hook_PostThinkPost()
 
 bool SDKHooks::Hook_Reload()
 {
+	static const SDKHookType type = SDKHook_Reload;
 	int entity = gamehelpers->EntityToBCompatRef(META_IFACEPTR(CBaseEntity));
 	cell_t res;
 	IPluginFunction *callback = NULL;
 
 	HOOKLOOP
 	{
-		if (g_HookList[i].entity != entity || g_HookList[i].type != SDKHook_Reload)
+		const HookList &Hook = g_HookList[type][i];
+		if (Hook.entity != entity)
 			continue;
 
-		callback = g_HookList[i].callback;
+		callback = Hook.callback;
 		callback->PushCell(entity);
 		callback->Execute(&res);
 	}
@@ -1120,15 +1139,17 @@ bool SDKHooks::Hook_Reload()
 
 bool SDKHooks::Hook_ReloadPost()
 {
+	static const SDKHookType type = SDKHook_ReloadPost;
 	int entity = gamehelpers->EntityToBCompatRef(META_IFACEPTR(CBaseEntity));
 	IPluginFunction *callback = NULL;
 
 	HOOKLOOP
 	{
-		if (g_HookList[i].entity != entity || g_HookList[i].type != SDKHook_ReloadPost)
+		const HookList &Hook = g_HookList[type][i];
+		if (Hook.entity != entity)
 			continue;
 
-		callback = g_HookList[i].callback;
+		callback = Hook.callback;
 		callback->PushCell(entity);
 		callback->PushCell(META_RESULT_OVERRIDE_RET(bool) ? 1 : 0);
 		callback->Execute(NULL);
@@ -1149,6 +1170,7 @@ void SDKHooks::Hook_SetTransmit(CCheckTransmitInfo *pInfo, bool bAlways)
 
 bool SDKHooks::Hook_ShouldCollide(int collisionGroup, int contentsMask)
 {
+	static const SDKHookType type = SDKHook_ShouldCollide;
 	int entity = gamehelpers->EntityToBCompatRef(META_IFACEPTR(CBaseEntity));
 	IPluginFunction *callback = NULL;
 	bool origRet = ((META_RESULT_STATUS >= MRES_OVERRIDE)?(META_RESULT_OVERRIDE_RET(bool)):(META_RESULT_ORIG_RET(bool)));
@@ -1156,10 +1178,11 @@ bool SDKHooks::Hook_ShouldCollide(int collisionGroup, int contentsMask)
 
 	HOOKLOOP
 	{
-		if (g_HookList[i].entity != entity || g_HookList[i].type != SDKHook_ShouldCollide)
+		const HookList &Hook = g_HookList[type][i];
+		if (Hook.entity != entity)
 			continue;
 
-		callback = g_HookList[i].callback;
+		callback = Hook.callback;
 		callback->PushCell(entity);
 		callback->PushCell(collisionGroup);
 		callback->PushCell(contentsMask);
@@ -1178,16 +1201,18 @@ bool SDKHooks::Hook_ShouldCollide(int collisionGroup, int contentsMask)
 
 void SDKHooks::Hook_Spawn()
 {
+	static const SDKHookType type = SDKHook_Spawn;
 	int entity = gamehelpers->EntityToBCompatRef(META_IFACEPTR(CBaseEntity));
 	IPluginFunction *callback = NULL;
 	cell_t res;
 
 	HOOKLOOP
 	{
-		if (g_HookList[i].entity != entity || g_HookList[i].type != SDKHook_Spawn)
+		const HookList &Hook = g_HookList[type][i];
+		if (Hook.entity != entity)
 			continue;
 
-		callback = g_HookList[i].callback;
+		callback = Hook.callback;
 		callback->PushCell(entity);
 		callback->Execute(&res);
 	}
@@ -1250,6 +1275,7 @@ void SDKHooks::Hook_TraceAttack(CTakeDamageInfoHack &info, const Vector &vecDir,
 void SDKHooks::Hook_TraceAttack(CTakeDamageInfoHack &info, const Vector &vecDir, trace_t *ptr)
 #endif
 {
+	static const SDKHookType type = SDKHook_TraceAttack;
 	int entity = gamehelpers->EntityToBCompatRef(META_IFACEPTR(CBaseEntity));
 	int attacker = info.GetAttacker();
 	int inflictor = info.GetInflictor();
@@ -1261,10 +1287,11 @@ void SDKHooks::Hook_TraceAttack(CTakeDamageInfoHack &info, const Vector &vecDir,
 
 	HOOKLOOP
 	{
-		if(g_HookList[i].entity != entity || g_HookList[i].type != SDKHook_TraceAttack)
+		const HookList &Hook = g_HookList[type][i];
+		if(Hook.entity != entity)
 			continue;
 
-		callback = g_HookList[i].callback;
+		callback = Hook.callback;
 		callback->PushCell(entity);
 		callback->PushCellByRef(&attacker);
 		callback->PushCellByRef(&inflictor);
@@ -1315,15 +1342,17 @@ void SDKHooks::Hook_TraceAttackPost(CTakeDamageInfoHack &info, const Vector &vec
 void SDKHooks::Hook_TraceAttackPost(CTakeDamageInfoHack &info, const Vector &vecDir, trace_t *ptr)
 #endif
 {
+	static const SDKHookType type = SDKHook_TraceAttackPost;
 	int entity = gamehelpers->EntityToBCompatRef(META_IFACEPTR(CBaseEntity));
 	IPluginFunction *callback = NULL;
 
 	HOOKLOOP
 	{
-		if(g_HookList[i].entity != entity || g_HookList[i].type != SDKHook_TraceAttackPost)
+		const HookList &Hook = g_HookList[type][i];
+		if(Hook.entity != entity)
 			continue;
 
-		callback = g_HookList[i].callback;
+		callback = Hook.callback;
 		callback->PushCell(entity);
 		callback->PushCell(info.GetAttacker());
 		callback->PushCell(info.GetInflictor());
@@ -1340,6 +1369,7 @@ void SDKHooks::Hook_TraceAttackPost(CTakeDamageInfoHack &info, const Vector &vec
 
 void SDKHooks::Hook_Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
+	static const SDKHookType type = SDKHook_Use;
 	int entity = gamehelpers->EntityToBCompatRef(META_IFACEPTR(CBaseEntity));
 	int activator = gamehelpers->EntityToBCompatRef(pActivator);
 	int caller = gamehelpers->EntityToBCompatRef(pCaller);
@@ -1349,10 +1379,11 @@ void SDKHooks::Hook_Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 
 	HOOKLOOP
 	{
-		if(g_HookList[i].entity != entity || g_HookList[i].type != SDKHook_Use)
+		const HookList &Hook = g_HookList[type][i];
+		if(Hook.entity != entity)
 			continue;
 
-		callback = g_HookList[i].callback;
+		callback = Hook.callback;
 		callback->PushCell(entity);
 		callback->PushCell(activator);
 		callback->PushCell(caller);
@@ -1369,6 +1400,7 @@ void SDKHooks::Hook_Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 
 void SDKHooks::Hook_UsePost(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
+	static const SDKHookType type = SDKHook_UsePost;
 	int entity = gamehelpers->EntityToBCompatRef(META_IFACEPTR(CBaseEntity));
 	int activator = gamehelpers->EntityToBCompatRef(pActivator);
 	int caller = gamehelpers->EntityToBCompatRef(pCaller);
@@ -1377,10 +1409,11 @@ void SDKHooks::Hook_UsePost(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 
 	HOOKLOOP
 	{
-		if (g_HookList[i].entity != entity || g_HookList[i].type != SDKHook_UsePost)
+		const HookList &Hook = g_HookList[type][i];
+		if (Hook.entity != entity)
 			continue;
 
-		callback = g_HookList[i].callback;
+		callback = Hook.callback;
 		callback->PushCell(entity);
 		callback->PushCell(activator);
 		callback->PushCell(caller);
@@ -1501,16 +1534,19 @@ void SDKHooks::RemoveEntityHooks(CBaseEntity *pEnt)
 	int entity = gamehelpers->EntityToBCompatRef(pEnt);
 	
 	// Remove hooks
-	HOOKLOOP
-	{
-		if(g_HookList[i].entity == entity)
+	TYPELOOP
+		HOOKLOOP
 		{
+			const HookList &Hook = g_HookList[type][i];
+			if(Hook.entity != entity)
+			{
+				continue;
+			}
 #ifdef SDKHOOKSDEBUG
 			META_CONPRINTF("DEBUG: Removing hook #%d on entity %d (UpdateOnRemove or clientdisconnect)\n", i, entity);
 #endif
-			Unhook(i);
+			Unhook(static_cast<SDKHookType>(type), i);
 		}
-	}
 }
 
 CON_COMMAND(sdkhooks_listhooks, "Lists all current hooks")
@@ -1519,10 +1555,16 @@ CON_COMMAND(sdkhooks_listhooks, "Lists all current hooks")
 	
 	IPlugin *pPlugin;
 	const sm_plugininfo_t *info;
-	for(int i = g_HookList.Count() - 1; i >= 0; i--)
+	const char * pName;
+	TYPELOOP
 	{
-		g_HookList[i].callback->GetParentRuntime()->GetDefaultContext()->GetKey(2, (void **)&pPlugin);
-		info = pPlugin->GetPublicInfo();
-		META_CONPRINTF("%2d. %-24.23s %-18.17s %d\n", i + 1, info->name[0] ? info->name : pPlugin->GetFilename(), g_HookTypes[g_HookList[i].type].name, g_HookList[i].entity);
+		pName = g_HookTypes[type].name;
+		HOOKLOOP
+		{
+			const HookList &Hook = g_HookList[type][i];
+			Hook.callback->GetParentRuntime()->GetDefaultContext()->GetKey(2, (void **)&pPlugin);
+			info = pPlugin->GetPublicInfo();
+			META_CONPRINTF("%2d. %-24.23s %-18.17s %d\n", i + 1, info->name[0] ? info->name : pPlugin->GetFilename(), pName, Hook.entity);
+		}
 	}
 }

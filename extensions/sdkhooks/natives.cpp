@@ -84,10 +84,11 @@ cell_t Native_Unhook(IPluginContext *pContext, const cell_t *params)
 	SDKHookType type = (SDKHookType)params[2];
 	IPluginFunction *callback = pContext->GetFunctionById(params[3]);
 
-	for(int i = g_HookList.Count() - 1; i >= 0; i--)
+	HOOKLOOP
 	{
-		if(g_HookList[i].entity == entity && g_HookList[i].type == type && g_HookList[i].callback == callback)
-			g_Interface.Unhook(i);
+		const HookList &Hook = g_HookList[type][i];
+		if(Hook.entity == entity && Hook.callback == callback)
+			g_Interface.Unhook(type, i);
 	}
 
 	return 0;
