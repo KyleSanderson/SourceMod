@@ -12,7 +12,7 @@ def GetVersion():
 	m = re.match('commit (\d+)', p.stdoutText)
 	if m == None:
 		raise Exception('Could not determine repository version')
-	return m.groups()
+	return m.group(1)
 
 def GetChangeSet():
 	args = ['git', 'rev-list', 'HEAD', '--count']
@@ -20,7 +20,7 @@ def GetChangeSet():
 	m = re.match('(\d+)', p.stdoutText)
 	if m == None:
 		raise Exception('Could not determine repository changesets')
-	return m.groups()
+	return m.group(1)
 
 def PerformReversioning():
 	cset = GetVersion()
