@@ -9,7 +9,7 @@ import ambuild.command as command
 def GetVersion():
 	args = ['git', 'log', '-n', '1']
 	p = command.RunDirectCommand(AMBuild, args)
-	m = re.match('commit (\d+)', p.stdoutText)
+	m = re.match('commit (.*)', p.stdoutText)
 	if m == None:
 		raise Exception('Could not determine repository version')
 	return m.group(1)
