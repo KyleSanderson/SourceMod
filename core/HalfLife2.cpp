@@ -794,6 +794,7 @@ void CHalfLife2::ProcessFakeCliCmdQueue()
 	while (!m_CmdQueue.empty())
 	{
 		DelayedFakeCliCmd *pFake = m_CmdQueue.first();
+		m_CmdQueue.pop();
 
 		if (g_Players.GetClientOfUserId(pFake->userid) == pFake->client)
 		{
@@ -805,7 +806,7 @@ void CHalfLife2::ProcessFakeCliCmdQueue()
 #endif
 		}
 
-		m_CmdQueue.pop();
+		m_FreeCmds.push(pFake);
 	}
 }
 
