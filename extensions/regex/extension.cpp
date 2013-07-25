@@ -86,6 +86,8 @@ static cell_t CompileRegex(IPluginContext *pCtx, const cell_t *params)
 		pCtx->LocalToPhysAddr(params[5], &eOff);
 		const char *err = x->mError;
 		*eOff = x->mErrorOffset;
+		delete x;
+		
 		pCtx->StringToLocal(params[3], params[4], err ? err:"unknown");
 		return 0;
 	}
