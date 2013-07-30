@@ -1272,33 +1272,28 @@ int PlayerManager::GetClientOfUserId(int userid)
 	 * Valve engines.  :TODO: If this gets fixed, do an old engine 
 	 * check before invoking this backwards compat code.
 	 */
+	
+	CPlayer *player;
 	if (client)
 	{
-		CPlayer *player = GetPlayerByIndex(client);
-		if (player && player->IsConnected())
+		player = GetPlayerByIndex(client);
+		if (player && player->IsConnected() && player->GetUserId() == userid)
 		{
-			int realUserId = GetPlayerUserId(player->GetEdict());
-			if (realUserId == userid)
-			{
-				return client;
-			}
+			return client;
 		}
 	}
 
 	/* If we can't verify the userid, we have to do a manual loop */
-	CPlayer *player;
 	for (int i = 1; i <= m_maxClients; i++)
 	{
 		player = GetPlayerByIndex(i);
-		if (!player || !player->IsConnected())
+		if (!player || !player->IsConnected() || player->GetUserId() != userid)
 		{
 			continue;
 		}
-		if (GetPlayerUserId(player->GetEdict()) == userid)
-		{
-			m_UserIdLookUp[userid] = i;
-			return i;
-		}
+
+		m_UserIdLookUp[userid] = i;
+		return i;
 	}
 
 	return 0;
